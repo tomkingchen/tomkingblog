@@ -1,6 +1,6 @@
 baseURL = '/'
 languageCode = 'en-us'
-title = 'My IT Blog'
+title = 'Tom Tech Blog'
 theme = 'hugo-geekblog'
 
 paginate = 5
@@ -51,7 +51,7 @@ enableRobotsTXT = true
   term = ["HTML", "ATOM"]
 
 [params]
-  subtitle = "Sharing my journey in IT"
+  subtitle = "Share and Learn"
   description = "This is my personal blog about tech."
   keywords = []
   images = []
