@@ -4,7 +4,9 @@ date: 2021-10-16T11:50:12+10:00
 draft: false
 ---
 
-I just wrote a Cloudflare CLI tool called `flare` 🔥! You can check it out from my GitHub repo [git@github.com:tomkingchen/cloudflare-cli.git](git@github.com:tomkingchen/cloudflare-cli.git).
+I just wrote a Cloudflare CLI tool called `flare` 🔥! Check it out from my GitHub repo [git@github.com:tomkingchen/cloudflare-cli.git](git@github.com:tomkingchen/cloudflare-cli.git).
+
+The tool does some basic queries to Cloudflare API and retrieves information based on the parameters provided.
 
 The reason for creating the tool is mainly to help myself to quickly identify information hard to find through Cloudflare dashboard like Firewall rule ID. 
 
@@ -12,7 +14,7 @@ The current version is to focus on display information only rather than modifing
 
 The tool is written in Python (3.8) with the use of [Click](https://click.palletsprojects.com) package. With `Click` I was able to easily create a AWS CLI style command line tool.
 
-One of the use case of this tool is to get a list of all Firewall rules from Cloudflare and put them into a CSV file. I can then use this CSV as a lookup table in `Splunk` or other log analytic platforms. This enables us to live match WAF rule IDs obtained from `firewall logs` with rule description.
+One of the use case is to get a list of all Firewall rules from Cloudflare and put them into a CSV file. I can then use this CSV as a lookup table in `Splunk` or other log analytic platforms. This enables us to live match WAF rule IDs obtained from `firewall logs` with rule description.
 
 Here is the commands to generate the csv file.
 ```Bash
