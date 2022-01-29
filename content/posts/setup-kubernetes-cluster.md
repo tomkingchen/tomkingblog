@@ -126,7 +126,6 @@ $ kubectl get nodes
 NAME       STATUS   ROLES                  AGE   VERSION
 tom-lab1   Ready    control-plane,master   73m   v1.23.1
 ```
-## Restart
 ## Join the worker nodes (Workers Nodes)
 Jump onto the Worker nodes and run the command below to join them to the cluster.
 ```
