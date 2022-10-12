@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+
+
+    <meta name="description" content="In Part 1 we uploaded a Docker image to AWS ECR. In this post, we will complete building the ECS Cluster and deploy the container image onto the cluster.
+Note: The lab I worked on was recreated. The container image was renamed from webfront to testweb.
+Before we start, you need to understand some ECS basic concepts.
+Task Definition
+A task definition describes one or more containers, their relationships, how they should be launched etc.">
+
+
+
+    
+    
+        
+    
+
+    
+
+
+    <title>Deploy Docker Image with AWS ECS (Part 2) | Tom Tech Blog</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+
+    
+
+    <meta property="og:title" content="Deploy Docker Image with AWS ECS (Part 2)" />
+<meta property="og:description" content="In Part 1 we uploaded a Docker image to AWS ECR. In this post, we will complete building the ECS Cluster and deploy the container image onto the cluster.
+Note: The lab I worked on was recreated. The container image was renamed from webfront to testweb.
+Before we start, you need to understand some ECS basic concepts.
+Task Definition
+A task definition describes one or more containers, their relationships, how they should be launched etc." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/2018/10/deploy-docker-image-with-aws-ecs-part-2.html" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-10-16T20:34:00-07:00" />
+<meta property="article:modified_time" content="2021-09-19T15:05:42+10:00" />
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Deploy Docker Image with AWS ECS (Part 2)"/>
+<meta name="twitter:description" content="In Part 1 we uploaded a Docker image to AWS ECR. In this post, we will complete building the ECS Cluster and deploy the container image onto the cluster.
+Note: The lab I worked on was recreated. The container image was renamed from webfront to testweb.
+Before we start, you need to understand some ECS basic concepts.
+Task Definition
+A task definition describes one or more containers, their relationships, how they should be launched etc."/>
+
+
+    <link rel="preload" as="font" href="/fonts/Metropolis.woff2" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" as="font" href="/fonts/LiberationSans.woff2" type="font/woff2" crossorigin="anonymous">
+
+<link rel="preload" href="/main-0097dfc221.min.css" as="style">
+<link rel="stylesheet" href="/main-0097dfc221.min.css" media="all">
+
+<link rel="preload" href="/mobile-690f027f40.min.css" as="style">
+<link rel="stylesheet" href="/mobile-690f027f40.min.css" media="screen and (max-width: 45rem)">
+
+<link rel="preload" href="/print-86167e859a.min.css" as="style">
+<link rel="stylesheet" href="/print-86167e859a.min.css" media="print">
+
+<link rel="preload" href="/custom.css" as="style">
+<link rel="stylesheet" href="/custom.css" media="all">
+
+
+
+
+
+<!-- Made with Geekblog theme https://github.com/thegeeklab/hugo-geekblog -->
+
+    
+
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "articleSection": "posts",
+    "name": "Deploy Docker Image with AWS ECS (Part 2)",
+    "headline": "Deploy Docker Image with AWS ECS (Part 2)",
+    "alternativeHeadline": "",
+    "description": "In Part 1 we uploaded a Docker image to AWS ECR. In this post, we will complete building the ECS Cluster and deploy the container image onto the cluster.\nNote: The lab I worked on was recreated. The container image was renamed from webfront to testweb.\nBefore we start, you need to understand some ECS basic concepts.\nTask Definition\nA task definition describes one or more containers, their relationships, how they should be launched etc.",
+    "inLanguage": "en",
+    "isFamilyFriendly": "true",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "\/2018\/10\/deploy-docker-image-with-aws-ecs-part-2.html"
+    },
+    "author" : [
+    ],
+    "copyrightHolder" : "Tom Tech Blog",
+    "copyrightYear" : "2018",
+    "dateCreated": "2018-10-16T20:34:00.00Z",
+    "datePublished": "2018-10-16T20:34:00.00Z",
+    "dateModified": "2021-09-19T15:05:42.00Z",
+    "publisher":{
+        "@type":"Organization",
+        "name": "Tom Tech Blog",
+        "url": "/",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "\/brand.svg",
+            "width":"32",
+            "height":"32"
+        }
+    },
+    "url" : "\/2018\/10\/deploy-docker-image-with-aws-ecs-part-2.html",
+    "wordCount" : "2102",
+    "genre" : [ ]
+}
+</script>
+
+
+     
+
+</head>
+
+<body>
+    
+<!-- geekblog include: sprites/geekblog.svg -->
+<svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_arrow_back" xmlns="http://www.w3.org/2000/svg"><path d="M31.999 14.035v3.93H7.673l11.134 11.228L16 32 .001 16.001 16 .002l2.807 2.807L7.673 14.037h24.326z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_arrow_left" xmlns="http://www.w3.org/2000/svg"><path d="M7.954 17.965v5.988L.001 16l7.953-7.953v5.988H32v3.93H7.954z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_arrow_right" xmlns="http://www.w3.org/2000/svg"><path d="M24.046 14.035V8.047L31.999 16l-7.953 7.953v-5.988H0v-3.93h24.046z"/></symbol><symbol viewBox="-7.27 -7.27 42.55 42.55" id="gblog_bitbucket" xmlns="http://www.w3.org/2000/svg"><path d="M15.905 13.355c.189 1.444-1.564 2.578-2.784 1.839-1.375-.602-1.375-2.784-.034-3.403 1.151-.705 2.818.223 2.818 1.564zm1.907-.361c-.309-2.44-3.076-4.056-5.328-3.042-1.426.636-2.389 2.148-2.32 3.747.086 2.097 2.08 3.815 4.176 3.626s3.729-2.234 3.472-4.331zm4.108-9.315c-.756-.997-2.045-1.169-3.179-1.358-3.214-.516-6.513-.533-9.727.034-1.066.172-2.269.361-2.939 1.323 1.1 1.031 2.664 1.186 4.073 1.358 2.544.327 5.156.344 7.699.017 1.426-.172 3.008-.309 4.073-1.375zm.979 17.788c-.481 1.684-.206 3.953-1.994 4.932-3.076 1.701-6.806 1.89-10.191 1.289-1.787-.327-3.884-.894-4.864-2.578-.43-1.65-.705-3.334-.98-5.018l.103-.275.309-.155c5.121 3.386 12.288 3.386 17.427 0 .808.241.206 1.22.189 1.805zM26.01 4.951c-.584 3.764-1.255 7.51-1.908 11.257-.189 1.1-1.255 1.719-2.148 2.183-3.214 1.615-6.96 1.89-10.483 1.512-2.389-.258-4.829-.894-6.771-2.389-.911-.705-.911-1.908-1.083-2.922-.602-3.523-1.289-7.046-1.719-10.604.206-1.547 1.942-2.217 3.231-2.698C6.848.654 8.686.362 10.508.19c3.884-.378 7.854-.241 11.618.859 1.341.395 2.784.945 3.695 2.097.412.533.275 1.203.189 1.805z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_bookmarks" xmlns="http://www.w3.org/2000/svg"><path d="M20.357 5.856q1.157 0 2.043.851t.885 2.008v23.284l-10.212-4.357-10.144 4.357V8.715q0-1.157.885-2.008t2.042-.851h14.502zm5.787 18.859V5.856q0-1.157-.851-2.042t-2.008-.885H8.715q0-1.157.885-2.042t2.043-.885h14.502q1.157 0 2.043.885t.885 2.042v23.216z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_clear" xmlns="http://www.w3.org/2000/svg"><path d="M32 3.222L19.222 16 32 28.778l-3.221 3.221-12.778-12.778L3.223 31.999.002 28.778 12.78 16 .002 3.222 3.223.001l12.778 12.778L28.779.001z"/></symbol><symbol viewBox="-7.27 -7.27 42.55 42.55" id="gblog_cloud_off" xmlns="http://www.w3.org/2000/svg"><path d="M9.023 10.5H7q-1.914 0-3.281 1.395t-1.367 3.309 1.367 3.281T7 19.852h11.375zM3.5 4.976l1.477-1.477L24.5 23.022l-1.477 1.477-2.352-2.297H6.999q-2.898 0-4.949-2.051t-2.051-4.949q0-2.844 1.969-4.867t4.758-2.133zm19.086 5.578q2.242.164 3.828 1.832T28 16.351q0 3.008-2.461 4.758l-1.695-1.695q1.805-.984 1.805-3.063 0-1.422-1.039-2.461t-2.461-1.039h-1.75v-.602q0-2.68-1.859-4.539t-4.539-1.859q-1.531 0-2.953.711l-1.75-1.695Q11.431 3.5 14.001 3.5q2.953 0 5.496 2.078t3.09 4.977z"/></symbol><symbol viewBox="-7.27 -7.27 42.55 42.55" id="gblog_code" xmlns="http://www.w3.org/2000/svg"><path d="M9.917 24.5a1.75 1.75 0 10-3.501.001 1.75 1.75 0 003.501-.001zm0-21a1.75 1.75 0 10-3.501.001A1.75 1.75 0 009.917 3.5zm11.666 2.333a1.75 1.75 0 10-3.501.001 1.75 1.75 0 003.501-.001zm1.75 0a3.502 3.502 0 01-1.75 3.026c-.055 6.581-4.721 8.039-7.82 9.023-2.898.911-3.846 1.349-3.846 3.117v.474a3.502 3.502 0 011.75 3.026c0 1.932-1.568 3.5-3.5 3.5s-3.5-1.568-3.5-3.5c0-1.294.711-2.424 1.75-3.026V6.526A3.502 3.502 0 014.667 3.5c0-1.932 1.568-3.5 3.5-3.5s3.5 1.568 3.5 3.5a3.502 3.502 0 01-1.75 3.026v9.06c.93-.456 1.914-.766 2.807-1.039 3.391-1.075 5.323-1.878 5.359-5.687a3.502 3.502 0 01-1.75-3.026c0-1.932 1.568-3.5 3.5-3.5s3.5 1.568 3.5 3.5z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_contacts" xmlns="http://www.w3.org/2000/svg"><path d="M22.688 22.688v-2q0-1.5-2.281-2.438t-4.406-.938-4.406.938-2.281 2.438v2h13.375zM16 9q-1.25 0-2.125.875T13 12t.875 2.125T16 15t2.125-.875T19 12t-.875-2.125T16 9zm10.688-3.687q1.063 0 1.844.813t.781 1.875v16q0 1.063-.781 1.875t-1.844.813H5.313q-1.063 0-1.844-.813t-.781-1.875v-16q0-1.063.781-1.875t1.844-.813h21.375zM5.313 32v-2.688h21.375V32H5.313zM26.688 0v2.688H5.313V0h21.375z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_create" xmlns="http://www.w3.org/2000/svg"><path d="M31.499 7.167l-3.25 3.25-6.666-6.666 3.25-3.25q.5-.5 1.25-.5t1.25.5l4.166 4.166q.5.5.5 1.25t-.5 1.25zM.001 25.333L19.667 5.667l6.666 6.666L6.667 31.999H.001v-6.666z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_date" xmlns="http://www.w3.org/2000/svg"><path d="M27.192 28.844V11.192H4.808v17.652h22.384zm0-25.689q1.277 0 2.253.976t.976 2.253v22.459q0 1.277-.976 2.216t-2.253.939H4.808q-1.352 0-2.291-.901t-.939-2.253V6.385q0-1.277.939-2.253t2.291-.976h1.577V.001h3.23v3.155h12.769V.001h3.23v3.155h1.577zm-3.155 11.267v3.155h-3.23v-3.155h3.23zm-6.46 0v3.155h-3.155v-3.155h3.155zm-6.384 0v3.155h-3.23v-3.155h3.23z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_download" xmlns="http://www.w3.org/2000/svg"><path d="M2.866 28.209h26.269v3.79H2.866v-3.79zm26.268-16.925L16 24.418 2.866 11.284h7.493V.001h11.283v11.283h7.493z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_email" xmlns="http://www.w3.org/2000/svg"><path d="M28.845 9.615v-3.23L16 14.422 3.155 6.385v3.23L16 17.577zm0-6.46q1.277 0 2.216.977T32 6.385v19.23q0 1.277-.939 2.253t-2.216.977H3.155q-1.277 0-2.216-.977T0 25.615V6.385q0-1.277.939-2.253t2.216-.977h25.69z"/></symbol><symbol viewBox="-7.27 -7.27 42.55 42.55" id="gblog_git" xmlns="http://www.w3.org/2000/svg"><path d="M27.472 12.753L15.247.529a1.803 1.803 0 00-2.55 0l-2.84 2.84 2.137 2.137a2.625 2.625 0 013.501 3.501l3.499 3.499a2.625 2.625 0 11-1.237 1.237l-3.499-3.499c-.083.04-.169.075-.257.106v7.3a2.626 2.626 0 11-1.75 0v-7.3a2.626 2.626 0 01-1.494-3.607L8.62 4.606l-8.09 8.09a1.805 1.805 0 000 2.551l12.225 12.224a1.803 1.803 0 002.55 0l12.168-12.168a1.805 1.805 0 000-2.551z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_github" xmlns="http://www.w3.org/2000/svg"><path d="M16 .394c8.833 0 15.999 7.166 15.999 15.999 0 7.062-4.583 13.062-10.937 15.187-.813.146-1.104-.354-1.104-.771 0-.521.021-2.25.021-4.396 0-1.5-.5-2.458-1.083-2.958 3.562-.396 7.312-1.75 7.312-7.896 0-1.75-.625-3.167-1.646-4.291.167-.417.708-2.042-.167-4.25-1.333-.417-4.396 1.646-4.396 1.646a15.032 15.032 0 00-8 0S8.937 6.602 7.603 7.018c-.875 2.208-.333 3.833-.167 4.25-1.021 1.125-1.646 2.542-1.646 4.291 0 6.125 3.729 7.5 7.291 7.896-.458.417-.875 1.125-1.021 2.146-.917.417-3.25 1.125-4.646-1.333-.875-1.521-2.458-1.646-2.458-1.646-1.562-.021-.104.979-.104.979 1.042.479 1.771 2.333 1.771 2.333.938 2.854 5.396 1.896 5.396 1.896 0 1.333.021 2.583.021 2.979 0 .417-.292.917-1.104.771C4.582 29.455-.001 23.455-.001 16.393-.001 7.56 7.165.394 15.998.394zM6.063 23.372c.042-.083-.021-.187-.146-.25-.125-.042-.229-.021-.271.042-.042.083.021.187.146.25.104.062.229.042.271-.042zm.646.709c.083-.062.062-.208-.042-.333-.104-.104-.25-.146-.333-.062-.083.062-.062.208.042.333.104.104.25.146.333.062zm.625.937c.104-.083.104-.25 0-.396-.083-.146-.25-.208-.354-.125-.104.062-.104.229 0 .375s.271.208.354.146zm.875.875c.083-.083.042-.271-.083-.396-.146-.146-.333-.167-.417-.062-.104.083-.062.271.083.396.146.146.333.167.417.062zm1.187.521c.042-.125-.083-.271-.271-.333-.167-.042-.354.021-.396.146s.083.271.271.312c.167.062.354 0 .396-.125zm1.313.104c0-.146-.167-.25-.354-.229-.187 0-.333.104-.333.229 0 .146.146.25.354.229.187 0 .333-.104.333-.229zm1.208-.208c-.021-.125-.187-.208-.375-.187-.187.042-.312.167-.292.312.021.125.187.208.375.167s.312-.167.292-.292z"/></symbol><symbol viewBox="-7.27 -7.27 42.55 42.55" id="gblog_gitlab" xmlns="http://www.w3.org/2000/svg"><path d="M1.629 11.034L14 26.888.442 17.048a1.09 1.09 0 01-.39-1.203l1.578-4.811zm7.217 0h10.309l-5.154 15.854zM5.753 1.475l3.093 9.559H1.63l3.093-9.559a.548.548 0 011.031 0zm20.618 9.559l1.578 4.811c.141.437-.016.922-.39 1.203l-13.558 9.84 12.371-15.854zm0 0h-7.216l3.093-9.559a.548.548 0 011.031 0z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_heart" xmlns="http://www.w3.org/2000/svg"><path d="M16 29.714a1.11 1.11 0 01-.786-.321L4.072 18.643c-.143-.125-4.071-3.714-4.071-8 0-5.232 3.196-8.357 8.535-8.357 3.125 0 6.053 2.464 7.464 3.857 1.411-1.393 4.339-3.857 7.464-3.857 5.339 0 8.535 3.125 8.535 8.357 0 4.286-3.928 7.875-4.089 8.035L16.785 29.392c-.214.214-.5.321-.786.321z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_keyborad_arrow_left" xmlns="http://www.w3.org/2000/svg"><path d="M25.875 28.25L22.125 32 6.126 16.001 22.125.002l3.75 3.75-12.25 12.25z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_keyborad_arrow_right" xmlns="http://www.w3.org/2000/svg"><path d="M6.125 28.25L18.375 16 6.125 3.75 9.875 0l15.999 15.999L9.875 31.998z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_link" xmlns="http://www.w3.org/2000/svg"><path d="M24.037 7.963q3.305 0 5.634 2.366T32 16t-2.329 5.671-5.634 2.366h-6.46v-3.08h6.46q2.028 0 3.493-1.465t1.465-3.493-1.465-3.493-3.493-1.465h-6.46v-3.08h6.46zM9.615 17.578v-3.155h12.77v3.155H9.615zM3.005 16q0 2.028 1.465 3.493t3.493 1.465h6.46v3.08h-6.46q-3.305 0-5.634-2.366T0 16.001t2.329-5.671 5.634-2.366h6.46v3.08h-6.46q-2.028 0-3.493 1.465t-1.465 3.493z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_menu" xmlns="http://www.w3.org/2000/svg"><path d="M.001 5.334h31.998v3.583H.001V5.334zm0 12.416v-3.5h31.998v3.5H.001zm0 8.916v-3.583h31.998v3.583H.001z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_notifications" xmlns="http://www.w3.org/2000/svg"><path d="M25.846 22.154l3.308 3.308v1.615H2.847v-1.615l3.308-3.308V14q0-3.846 1.961-6.692t5.423-3.692V2.462q0-1 .692-1.731T16 0t1.769.731.692 1.731v1.154q3.461.846 5.423 3.692T25.846 14v8.154zM16 32q-1.385 0-2.346-.923t-.962-2.308h6.615q0 1.308-1 2.269T15.999 32z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_person" xmlns="http://www.w3.org/2000/svg"><path d="M16 20.023q5.052 0 10.526 2.199t5.473 5.754v4.023H0v-4.023q0-3.555 5.473-5.754t10.526-2.199zM16 16q-3.275 0-5.614-2.339T8.047 8.047t2.339-5.661T16 0t5.614 2.386 2.339 5.661-2.339 5.614T16 16z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_pin" xmlns="http://www.w3.org/2000/svg"><path d="M17.6 19.2h9.6v-1.6L22.4 16V3.2l4.8-1.6V0H4.8v1.6l4.8 1.6V16l-4.8 1.6v1.6h9.6v11.2L16 32l1.6-1.6V19.2z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_rss_feed" xmlns="http://www.w3.org/2000/svg"><path d="M-.481 12.048q8.482 0 14.457 5.976t5.976 14.457h-5.879q0-5.976-4.289-10.264T-.48 17.928v-5.879zm0-11.565q13.204 0 22.601 9.397t9.397 22.601h-5.783q0-10.891-7.662-18.553T-.481 6.266V.483zm0 27.468q0-1.831 1.301-3.132t3.229-1.301 3.181 1.253 1.253 3.181-1.301 3.229-3.132 1.301q-1.928 0-3.229-1.301T-.48 27.952z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_search" xmlns="http://www.w3.org/2000/svg"><path d="M11.925 20.161q3.432 0 5.834-2.402t2.402-5.834-2.402-5.834-5.834-2.402-5.834 2.402-2.402 5.834 2.402 5.834 5.834 2.402zm10.981 0L32 29.255 29.255 32l-9.094-9.094v-1.458l-.515-.515q-3.26 2.831-7.721 2.831-4.976 0-8.45-3.432T.001 11.925t3.474-8.45 8.45-3.474 8.407 3.474 3.432 8.45q0 1.802-.858 4.075t-1.973 3.646l.515.515h1.458z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_security" xmlns="http://www.w3.org/2000/svg"><path d="M16 0l13.072 5.855v8.715q0 6.059-3.745 11.063T16 31.999q-5.583-1.362-9.327-6.366T2.928 14.57V5.855zm0 16v13.004q4.017-1.294 6.808-4.868T26.144 16H16zm0 0V3.2L5.856 7.693v8.306H16z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_timer" xmlns="http://www.w3.org/2000/svg"><path d="M16 29q4.428 0 7.536-3.143t3.107-7.571-3.107-7.536T16 7.643 8.464 10.75t-3.107 7.536 3.107 7.571T16 29zM26.714 9.786q1.214 1.571 2.107 4.036t.893 4.464q0 5.643-4 9.678T16 32t-9.714-4.036-4-9.678 4-9.678T16 4.572q1.929 0 4.464.929t4.107 2.143l2.143-2.214q1.143.929 2.143 2.143zM14.5 19.857v-9.143h3v9.143h-3zM20.571.001v3.071h-9.143V.001h9.143z"/></symbol><symbol viewBox="-7.27 -7.27 46.55 46.55" id="gblog_tree" xmlns="http://www.w3.org/2000/svg"><path d="M32 14.423H20.808V9.616h-3.23v12.77h3.23v-4.807H32v12.845H20.808v-4.807h-6.385v-16h-3.23v4.807H.001V1.579h11.192v4.807h9.615V1.579H32v12.845z"/></symbol></svg>
+
+
+
+    <div class="wrapper">
+        <header class="gblog-header">
+    <div class="container flex align-center justify-center">
+        <a class="gblog-header__link" rel="me" href="/">
+            <span class="gblog-brand flex align-center justify-center">
+                <img class="gblog-brand__img" src="/brand.svg" alt="">
+                Tom Tech Blog
+            </span>
+            
+            <span class="gblog-brand__subtitle flex align-center justify-center">Share and Learn</span>
+            
+        </a>
+    </div>
+</header>
+<nav class="gblog-nav">
+    <input type="checkbox" id="menu-control" class="hidden">
+    <div class="gblog-nav__control">
+        <label for="menu-control"  class="flex align-center justify-center">
+            <svg class="icon gblog_menu"><use xlink:href="#gblog_menu"></use></svg>
+            <svg class="icon gblog_clear"><use xlink:href="#gblog_clear"></use></svg>
+            <span>Nav</span>
+        </label>
+    </div>
+    <ul class="gblog-nav__list container flex flex-wrap justify-center menu-content">
+        
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/AWS/">AWS</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Azure/">Azure</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Cloud/">Cloud</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Exchange-Hybrid/">Exchange Hybrid</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/GAL/">GAL</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Mailbox-Migration/">Mailbox Migration</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Office-365/">Office 365</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/PowerShell/">PowerShell</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/VPN/">VPN</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/mail.onmicrosoft.com/">mail.onmicrosoft.com</a>
+        </li>
+        
+        
+        
+        
+    </ul>
+</nav>
+
+
+        <main class="gblog-page container">
+            
+    <article class="gblog-post">
+        <header class="gblog-post__header">
+            
+            
+
+            <h1>Deploy Docker Image with AWS ECS (Part 2)</h1>
+            
+        </header>
+
+        <section class="gblog-markdown">
+            <p>In Part 1 we uploaded a Docker image to AWS ECR. In this post, we will complete building the ECS Cluster and deploy the container image onto the cluster.</p>
+<p>Note: The lab I worked on was recreated. The container image was renamed from webfront to testweb.</p>
+<p>Before we start, you need to understand some ECS basic concepts.</p>
+<p><strong>Task Definition</strong></p>
+<p>A task definition describes one or more containers, their relationships, how they should be launched etc. It’s basically a JSON file contains the configuration details of the container(s).</p>
+<p><strong>Task</strong></p>
+<p>A task is the instantiation of a task definition. They are created based on the task definitions you provided.</p>
+<p><strong>Service (Scheduler)</strong></p>
+<p>In short, the service or service scheduler controls the tasks running across the ECS cluster.</p>
+<p><strong>Cluster</strong></p>
+<p>Cluster is the mothership of those tasks. It hosts the containers launched from the tasks.</p>
+<p><strong>Container Instance</strong></p>
+<p>By now, AWS ECS offers two types of ECS Cluster: Fargate and EC2. With Fargate, AWS manages the cluster resources for you. With EC2, ECS provisions EC2 instances based on your specification and you are in charge of maintaining those EC2 instances. Those EC2 instances are “Container Instances” as they are the ones host containers.</p>
+<p><strong>Container Agent</strong></p>
+<p>For a EC2 ECS cluster, container agent runs on each Container Instance. It is the key component that controls ECS tasks and resource utilization.</p>
+<p>To learn more about ECS basic concepts, you can refer to <a class="gblog-markdown__link" href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html">this AWS document</a>.</p>
+<p><strong>1. Create Task Definition</strong></p>
+<p>The first step we take is to create a new Task Definition.</p>
+<p>Choose <strong>EC2</strong> as the launch type.</p>
+<p>Name the Task Definition as <strong>testweb-task</strong>.</p>
+<p>Leave Network Mode as <default>, which will be Bridged for Linux instance.</p>
+<p>Set Task size as below.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-rQH3Hs9Icrg/W8atqJFEMNI/AAAAAAAAKVc/MG8tdbCLL-swdTOcbDtxS9HCES4RZN4sACHMYCw/s1600-h/image%255B2%255D"><img src="https://lh3.googleusercontent.com/-ri9BQXFJzCc/W8atr_Gx4II/AAAAAAAAKVg/Dl-794wWZ18mFamYfMktaSDwLu7NhmuEQCHMYCw/image_thumb?imgmax=800" alt="image"  title="image" /></a></p>
+<p>Click <strong>Add container</strong> to add the container image from ECR.</p>
+<p>Name the container as <strong>testweb.</strong></p>
+<p>Under <strong>Image</strong>, put in the ECR repo URL with tag, below is an example.</p>
+<p><em>1234567891011.dkr.ecr.ap-southeast-1.amazonaws.com/testweb:latest</em></p>
+<p>For memory limits, set hard limit as “512” and soft limit as “256”.</p>
+<p>Set Port mappings as 80 to 80 tcp.</p>
+<p>Click <strong>Add</strong> to add the container configuration.</p>
+<p>Click Create <strong>to create the Task Definition.</strong></p>
+<p>The Task Definition can also be created with JSON. Below is the code.</p>
+<pre tabindex="0"><code>{  
+  &#34;executionRoleArn&#34;: null,  
+  &#34;containerDefinitions&#34;: \[  
+    {  
+      &#34;dnsSearchDomains&#34;: null,  
+      &#34;logConfiguration&#34;: null,  
+      &#34;entryPoint&#34;: null,  
+      &#34;portMappings&#34;: \[  
+        {  
+          &#34;hostPort&#34;: 80,  
+          &#34;protocol&#34;: &#34;tcp&#34;,  
+          &#34;containerPort&#34;: 80  
+        }  
+      \],  
+      &#34;command&#34;: null,  
+      &#34;linuxParameters&#34;: null,  
+      &#34;cpu&#34;: 512,  
+      &#34;environment&#34;: \[\],  
+      &#34;ulimits&#34;: null,  
+      &#34;dnsServers&#34;: null,  
+      &#34;mountPoints&#34;: \[\],  
+      &#34;workingDirectory&#34;: null,  
+      &#34;dockerSecurityOptions&#34;: null,  
+      &#34;memory&#34;: 512,  
+      &#34;memoryReservation&#34;: 256,  
+      &#34;volumesFrom&#34;: \[\],  
+      &#34;image&#34;: &#34;12345678910.dkr.ecr.ap-southeast-1.amazonaws.com/testweb:latest&#34;,  
+      &#34;disableNetworking&#34;: null,  
+      &#34;interactive&#34;: null,  
+      &#34;healthCheck&#34;: null,  
+      &#34;essential&#34;: true,  
+      &#34;links&#34;: null,  
+      &#34;hostname&#34;: null,  
+      &#34;extraHosts&#34;: null,  
+      &#34;pseudoTerminal&#34;: null,  
+      &#34;user&#34;: null,  
+      &#34;readonlyRootFilesystem&#34;: null,  
+      &#34;dockerLabels&#34;: null,  
+      &#34;systemControls&#34;: null,  
+      &#34;privileged&#34;: null,  
+      &#34;name&#34;: &#34;testweb&#34;  
+    }  
+  \],  
+  &#34;placementConstraints&#34;: \[\],  
+  &#34;memory&#34;: &#34;512&#34;,  
+  &#34;taskRoleArn&#34;: null,  
+  &#34;compatibilities&#34;: \[  
+    &#34;EC2&#34;  
+  \],  
+  &#34;taskDefinitionArn&#34;: &#34;arn:aws:ecs:ap-southeast-1:297012811963:task-definition/testweb-task:1&#34;,  
+  &#34;family&#34;: &#34;testweb-task&#34;,  
+  &#34;requiresAttributes&#34;: \[  
+    {  
+      &#34;targetId&#34;: null,  
+      &#34;targetType&#34;: null,  
+      &#34;value&#34;: null,  
+      &#34;name&#34;: &#34;com.amazonaws.ecs.capability.ecr-auth&#34;  
+    },  
+    {  
+      &#34;targetId&#34;: null,  
+      &#34;targetType&#34;: null,  
+      &#34;value&#34;: null,  
+      &#34;name&#34;: &#34;com.amazonaws.ecs.capability.docker-remote-api.1.21&#34;  
+    }  
+  \],  
+  &#34;requiresCompatibilities&#34;: \[  
+    &#34;EC2&#34;  
+  \],  
+  &#34;networkMode&#34;: null,  
+  &#34;cpu&#34;: &#34;1024&#34;,  
+  &#34;revision&#34;: 1,  
+  &#34;status&#34;: &#34;ACTIVE&#34;,  
+  &#34;volumes&#34;: \[\]  
+}  
+</code></pre><p><strong>2. Create ECS Cluster</strong></p>
+<p>Under Amazon ECS click <strong>Clusters</strong> and click <strong>Create Cluster</strong>.</p>
+<p>Select <strong>EC2 Linux + Networking</strong> and click <strong>Next step</strong>.</p>
+<p>Name the cluster. I named it as testweb-clu, which is a bad name, you never want to name your cluster with a single image name, as the container suppose to present a micro service of your application.</p>
+<p>Choose the EC2 instance type. For testing we will use t2.micro and 1 for Number of instances. Select a keypair so we can log into the Container Instances for some troubleshooting if needed.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-6bzT30sFlAg/W8a_LuWhMjI/AAAAAAAAKV8/mz67QJGxFL86XZrSwnIOstbnZdm6rIWbACHMYCw/s1600-h/image%255B5%255D"><img src="https://lh3.googleusercontent.com/-vvvO-6bwwKo/W8a_Mr1JTpI/AAAAAAAAKWA/evWbE17Hh7sWyAl8BdnItwPN-868KHUVQCHMYCw/image_thumb%255B1%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>Under Networking, Create a new VPC, along with two new subnets.</p>
+<p>Create a new security group and add rule to allow public access to TCP port 80.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-yeAnpBHmek4/W8a_N9_UN_I/AAAAAAAAKWE/rRiiuX4IhRUs-NBbs08oCykAwPBV_HfZQCHMYCw/s1600-h/image%255B8%255D"><img src="https://lh3.googleusercontent.com/-1sxWGaowNGQ/W8a_PKLKEdI/AAAAAAAAKWI/9M6zR9mTmM8uMQZfyZtkiC8-bUOjpr6zACHMYCw/image_thumb%255B2%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>To allow the EC2 Container Instance to access ECS, we ill need to assign an IAM role to it. The IAM role contains 2 Amazon policies.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-GBamYe8OY5I/W8a_QeMR3pI/AAAAAAAAKWM/TUPjevgfa041G2wVCDzhjCnw1CGZ0Fu2gCHMYCw/s1600-h/image%255B11%255D"><img src="https://lh3.googleusercontent.com/-IthuLqwSjH8/W8a_RVyc3FI/AAAAAAAAKWQ/jb_2WyHF4vglqlDmtTb6w-FWpeQit7OWwCHMYCw/image_thumb%255B3%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>Click <strong>Create</strong> to create the Cluster. Interestingly, you can see the cluster provision is actually done through a CloudFormation template.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-vtmnPz7P8oM/W8a_StkvyAI/AAAAAAAAKWU/BjxeEnO4tpgrMrWTKUzWTWt15NCd44ZRACHMYCw/s1600-h/image%255B14%255D"><img src="https://lh3.googleusercontent.com/-iJ3IW2oxYJE/W8a_TkldYbI/AAAAAAAAKWY/WkJPPAwDhnwmICrj_km9-VYCiw-Zg-M9gCHMYCw/image_thumb%255B4%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>From the CloudFormation stack details, we can see all the script did was to provision a Launch Configuration and a AutoScaling Group.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-9iyQWPRL-O4/W8a_UlsAPfI/AAAAAAAAKWc/x65lG0CBex0DP5n09GytWr80gINP-07hwCHMYCw/s1600-h/image%255B17%255D"><img src="https://lh3.googleusercontent.com/-psk9l27yWCU/W8a_VgK2cUI/AAAAAAAAKWg/lFKfkUimUSEPLyz6KmTyLxYwx_bOlNbdgCHMYCw/image_thumb%255B5%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>Here is the CloudFormation Template code.</p>
+<pre tabindex="0"><code>AWSTemplateFormatVersion: &#39;2010-09-09&#39;  
+Description: \&gt;  
+  AWS CloudFormation template to create a new VPC  
+  or use an existing VPC for ECS deployment  
+  in Create Cluster Wizard. Requires exactly 1  
+  Instance Types for a Spot Request.  
+Parameters:  
+  EcsClusterName:  
+    Type: String  
+    Description: \&gt;  
+      Specifies the ECS Cluster Name with which the resources would be  
+      associated  
+    Default: default  
+  EcsAmiId:  
+    Type: String  
+    Description: Specifies the AMI ID for your container instances.  
+  EcsInstanceType:  
+    Type: CommaDelimitedList  
+    Description: \&gt;  
+      Specifies the EC2 instance type for your container instances.  
+      Defaults to m4.large  
+    Default: m4.large  
+    ConstraintDescription: must be a valid EC2 instance type.  
+  KeyName:  
+    Type: String  
+    Description: \&gt;  
+      Optional - Specifies the name of an existing Amazon EC2 key pair  
+      to enable SSH access to the EC2 instances in your cluster.  
+    Default: &#39;&#39;  
+  VpcId:  
+    Type: String  
+    Description: \&gt;  
+      Optional - Specifies the ID of an existing VPC in which to launch  
+      your container instances. If you specify a VPC ID, you must specify a list of  
+      existing subnets in that VPC. If you do not specify a VPC ID, a new VPC is created  
+      with atleast 1 subnet.  
+    Default: &#39;&#39;  
+    ConstraintDescription: \&gt;  
+      VPC Id must begin with &#39;vpc-&#39; or leave blank to have a  
+      new VPC created  
+  SubnetIds:  
+    Type: CommaDelimitedList  
+    Description: \&gt;  
+      Optional - Specifies the Comma separated list of existing VPC Subnet  
+      Ids where ECS instances will run  
+    Default: &#39;&#39;  
+  SecurityGroupId:  
+    Type: String  
+    Description: \&gt;  
+      Optional - Specifies the Security Group Id of an existing Security  
+      Group. Leave blank to have a new Security Group created  
+    Default: &#39;&#39;  
+  VpcCidr:  
+    Type: String  
+    Description: Optional - Specifies the CIDR Block of VPC  
+    Default: &#39;&#39;  
+  SubnetCidr1:  
+    Type: String  
+    Description: Specifies the CIDR Block of Subnet 1  
+    Default: &#39;&#39;  
+  SubnetCidr2:  
+    Type: String  
+    Description: Specifies the CIDR Block of Subnet 2  
+    Default: &#39;&#39;  
+  SubnetCidr3:  
+    Type: String  
+    Description: Specifies the CIDR Block of Subnet 3  
+    Default: &#39;&#39;  
+  AsgMaxSize:  
+    Type: Number  
+    Description: \&gt;  
+      Specifies the number of instances to launch and register to the cluster.  
+      Defaults to 1.  
+    Default: &#39;1&#39;  
+  IamRoleInstanceProfile:  
+    Type: String  
+    Description: \&gt;  
+      Specifies the Name or the Amazon Resource Name (ARN) of the instance  
+      profile associated with the IAM role for the instance  
+  SecurityIngressFromPort:  
+    Type: Number  
+    Description: \&gt;  
+      Optional - Specifies the Start of Security Group port to open on  
+      ECS instances - defaults to port 0  
+    Default: &#39;0&#39;  
+  SecurityIngressToPort:  
+    Type: Number  
+    Description: \&gt;  
+      Optional - Specifies the End of Security Group port to open on ECS  
+      instances - defaults to port 65535  
+    Default: &#39;65535&#39;  
+  SecurityIngressCidrIp:  
+    Type: String  
+    Description: \&gt;  
+      Optional - Specifies the CIDR/IP range for Security Ports - defaults  
+      to 0.0.0.0/0  
+    Default: 0.0.0.0/0  
+  EcsEndpoint:  
+    Type: String  
+    Description: \&gt;  
+      Optional - Specifies the ECS Endpoint for the ECS Agent to connect to  
+    Default: &#39;&#39;  
+  VpcAvailabilityZones:  
+    Type: CommaDelimitedList  
+    Description: \&gt;  
+      Specifies a comma-separated list of 3 VPC Availability Zones for  
+      the creation of new subnets. These zones must have the available status.  
+    Default: &#39;&#39;  
+  EbsVolumeSize:  
+    Type: Number  
+    Description: \&gt;  
+      Optional - Specifies the Size in GBs, of the newly created Amazon  
+      Elastic Block Store (Amazon EBS) volume  
+    Default: &#39;0&#39;  
+  EbsVolumeType:  
+    Type: String  
+    Description: Optional - Specifies the Type of (Amazon EBS) volume  
+    Default: &#39;&#39;  
+    AllowedValues:  
+      \- &#39;&#39;  
+      \- standard  
+      \- io1  
+      \- gp2  
+      \- sc1  
+      \- st1  
+    ConstraintDescription: Must be a valid EC2 volume type.  
+  DeviceName:  
+    Type: String  
+    Description: Optional - Specifies the device mapping for the Volume  
+  UseSpot:  
+    Type: String  
+    Default: &#39;false&#39;  
+  IamSpotFleetRoleArn:  
+    Type: String  
+    Default: &#39;&#39;  
+  SpotPrice:  
+    Type: String  
+    Default: &#39;&#39;  
+  SpotAllocationStrategy:  
+    Type: String  
+    Default: &#39;diversified&#39;  
+    AllowedValues:  
+      \- &#39;lowestPrice&#39;  
+      \- &#39;diversified&#39;  
+  UserData:  
+    Type: String  
+  IsWindows:  
+    Type: String  
+    Default: &#39;false&#39;  
+Conditions:  
+  CreateEC2LCWithKeyPair:  
+    !Not \[!Equals \[!Ref KeyName, &#39;&#39;\]\]  
+  SetEndpointToECSAgent:  
+    !Not \[!Equals \[!Ref EcsEndpoint, &#39;&#39;\]\]  
+  CreateNewSecurityGroup:  
+    !Equals \[!Ref SecurityGroupId, &#39;&#39;\]  
+  CreateNewVpc:  
+    !Equals \[!Ref VpcId, &#39;&#39;\]  
+  CreateSubnet1: !And  
+    \- !Not \[!Equals \[!Ref SubnetCidr1, &#39;&#39;\]\]  
+    \- !Condition CreateNewVpc  
+  CreateSubnet2: !And  
+    \- !Not \[!Equals \[!Ref SubnetCidr2, &#39;&#39;\]\]  
+    \- !Condition CreateSubnet1  
+  CreateSubnet3: !And  
+    \- !Not \[!Equals \[!Ref SubnetCidr3, &#39;&#39;\]\]  
+    \- !Condition CreateSubnet2  
+  CreateWithSpot: !Equals \[!Ref UseSpot, &#39;true&#39;\]  
+  CreateWithASG: !Not \[!Condition CreateWithSpot\]  
+  CreateWithSpotPrice: !Not \[!Equals \[!Ref SpotPrice, &#39;&#39;\]\]  
+Resources:  
+  Vpc:  
+    Condition: CreateSubnet1  
+    Type: AWS::EC2::VPC  
+    Properties:  
+      CidrBlock: !Ref VpcCidr  
+      EnableDnsSupport: &#39;true&#39;  
+      EnableDnsHostnames: &#39;true&#39;  
+  PubSubnetAz1:  
+    Condition: CreateSubnet1  
+    Type: AWS::EC2::Subnet  
+    Properties:  
+      VpcId: !Ref Vpc  
+      CidrBlock: !Ref SubnetCidr1  
+      AvailabilityZone: !Select \[ 0, !Ref VpcAvailabilityZones \]  
+      MapPublicIpOnLaunch: true  
+  PubSubnetAz2:  
+    Condition: CreateSubnet2  
+    Type: AWS::EC2::Subnet  
+    Properties:  
+      VpcId: !Ref Vpc  
+      CidrBlock: !Ref SubnetCidr2  
+      AvailabilityZone: !Select \[ 1, !Ref VpcAvailabilityZones \]  
+      MapPublicIpOnLaunch: true  
+  PubSubnetAz3:  
+    Condition: CreateSubnet3  
+    Type: AWS::EC2::Subnet  
+    Properties:  
+      VpcId: !Ref Vpc  
+      CidrBlock: !Ref SubnetCidr3  
+      AvailabilityZone: !Select \[ 2, !Ref VpcAvailabilityZones \]  
+      MapPublicIpOnLaunch: true  
+  InternetGateway:  
+    Condition: CreateSubnet1  
+    Type: AWS::EC2::InternetGateway  
+  AttachGateway:  
+    Condition: CreateSubnet1  
+    Type: AWS::EC2::VPCGatewayAttachment  
+    Properties:  
+      VpcId: !Ref Vpc  
+      InternetGatewayId: !Ref InternetGateway  
+  RouteViaIgw:  
+    Condition: CreateSubnet1  
+    Type: AWS::EC2::RouteTable  
+    Properties:  
+      VpcId: !Ref Vpc  
+  PublicRouteViaIgw:  
+    Condition: CreateSubnet1  
+    Type: AWS::EC2::Route  
+    DependsOn: AttachGateway  
+    Properties:  
+      RouteTableId: !Ref RouteViaIgw  
+      DestinationCidrBlock: 0.0.0.0/0  
+      GatewayId: !Ref InternetGateway  
+  PubSubnet1RouteTableAssociation:  
+    Condition: CreateSubnet1  
+    Type: AWS::EC2::SubnetRouteTableAssociation  
+    Properties:  
+      SubnetId: !Ref PubSubnetAz1  
+      RouteTableId: !Ref RouteViaIgw  
+  PubSubnet2RouteTableAssociation:  
+    Condition: CreateSubnet2  
+    Type: AWS::EC2::SubnetRouteTableAssociation  
+    Properties:  
+      SubnetId: !Ref PubSubnetAz2  
+      RouteTableId: !Ref RouteViaIgw  
+  PubSubnet3RouteTableAssociation:  
+    Condition: CreateSubnet3  
+    Type: AWS::EC2::SubnetRouteTableAssociation  
+    Properties:  
+      SubnetId: !Ref PubSubnetAz3  
+      RouteTableId: !Ref RouteViaIgw  
+  EcsSecurityGroup:  
+    Condition: CreateNewSecurityGroup  
+    Type: AWS::EC2::SecurityGroup  
+    Properties:  
+      GroupDescription: ECS Allowed Ports  
+      VpcId: !If \[ CreateSubnet1, !Ref Vpc, !Ref VpcId \]  
+      SecurityGroupIngress:  
+        IpProtocol: tcp  
+        FromPort: !Ref SecurityIngressFromPort  
+        ToPort: !Ref SecurityIngressToPort  
+        CidrIp: !Ref SecurityIngressCidrIp  
+  EcsInstanceLc:  
+    Type: AWS::AutoScaling::LaunchConfiguration  
+    Condition: CreateWithASG  
+    Properties:  
+      ImageId: !Ref EcsAmiId  
+      InstanceType: !Select \[ 0, !Ref EcsInstanceType \]  
+      AssociatePublicIpAddress: true  
+      IamInstanceProfile: !Ref IamRoleInstanceProfile  
+      KeyName: !If \[ CreateEC2LCWithKeyPair, !Ref KeyName, !Ref &#34;AWS::NoValue&#34; \]  
+      SecurityGroups: \[ !If \[ CreateNewSecurityGroup, !Ref EcsSecurityGroup, !Ref SecurityGroupId \] \]  
+      BlockDeviceMappings:  
+      \- DeviceName: !Ref DeviceName  
+        Ebs:  
+         VolumeSize: !Ref EbsVolumeSize  
+         VolumeType: !Ref EbsVolumeType  
+      UserData:  
+        Fn::Base64: !Ref UserData  
+  EcsInstanceAsg:  
+    Type: AWS::AutoScaling::AutoScalingGroup  
+    Condition: CreateWithASG  
+    Properties:  
+      VPCZoneIdentifier: !If  
+        \- CreateSubnet1  
+        \- !If  
+          \- CreateSubnet2  
+          \- !If  
+            \- CreateSubnet3  
+            \- \[ !Sub &#34;${PubSubnetAz1},  ${PubSubnetAz2},  ${PubSubnetAz3}&#34; \]  
+            \- \[ !Sub &#34;${PubSubnetAz1},  ${PubSubnetAz2}&#34; \]  
+          \- \[ !Sub &#34;${PubSubnetAz1}&#34; \]  
+        \- !Ref SubnetIds  
+      LaunchConfigurationName: !Ref EcsInstanceLc  
+      MinSize: &#39;0&#39;  
+      MaxSize: !Ref AsgMaxSize  
+      DesiredCapacity: !Ref AsgMaxSize  
+      Tags:  
+        \-  
+          Key: Name  
+          Value: !Sub &#34;ECS  Instance  \-  ${AWS::StackName}&#34;  
+          PropagateAtLaunch: &#39;true&#39;  
+        \-  
+          Key: Description  
+          Value: &#34;This  instance  is  the  part  of  the  Auto  Scaling  group  which  was  created  through  ECS  Console&#34;  
+          PropagateAtLaunch: &#39;true&#39;  
+  EcsSpotFleet:  
+    Condition: CreateWithSpot  
+    Type: AWS::EC2::SpotFleet  
+    Properties:  
+      SpotFleetRequestConfigData:  
+        AllocationStrategy: !Ref SpotAllocationStrategy  
+        IamFleetRole: !Ref IamSpotFleetRoleArn  
+        TargetCapacity: !Ref AsgMaxSize  
+        SpotPrice: !If \[ CreateWithSpotPrice, !Ref SpotPrice, !Ref &#39;AWS::NoValue&#39; \]  
+        TerminateInstancesWithExpiration: true  
+        LaunchSpecifications:   
+            \-  
+              IamInstanceProfile:  
+                Arn: !Ref IamRoleInstanceProfile  
+              ImageId: !Ref EcsAmiId  
+              InstanceType: !Select \[ 0, !Ref EcsInstanceType \]  
+              KeyName: !If \[ CreateEC2LCWithKeyPair, !Ref KeyName, !Ref &#34;AWS::NoValue&#34; \]  
+              Monitoring:  
+                Enabled: true  
+              SecurityGroups:  
+                \- GroupId: !If \[ CreateNewSecurityGroup, !Ref EcsSecurityGroup, !Ref SecurityGroupId \]  
+              SubnetId: !If  
+                      \- CreateSubnet1  
+                      \- !If  
+                        \- CreateSubnet2  
+                        \- !If  
+                          \- CreateSubnet3  
+                          \- !Join \[ &#34;,&#34; , \[ !Ref PubSubnetAz1, !Ref PubSubnetAz2, !Ref PubSubnetAz3 \] \]  
+                          \- !Join \[ &#34;,&#34; , \[ !Ref PubSubnetAz1, !Ref PubSubnetAz2 \] \]  
+                        \- !Ref PubSubnetAz1  
+                      \- !Join \[ &#34;,&#34; , !Ref SubnetIds \]  
+              BlockDeviceMappings:  
+                    \- DeviceName: !Ref DeviceName  
+                      Ebs:  
+                       VolumeSize: !Ref EbsVolumeSize  
+                       VolumeType: !Ref EbsVolumeType  
+              UserData:  
+                    Fn::Base64: !Ref UserData  
+Outputs:  
+  EcsInstanceAsgName:  
+    Condition: CreateWithASG  
+    Description: Auto Scaling Group Name for ECS Instances  
+    Value: !Ref EcsInstanceAsg  
+  EcsSpotFleetRequestId:  
+      Condition: CreateWithSpot  
+      Description: Spot Fleet Request for ECS Instances  
+      Value: !Ref EcsSpotFleet  
+  UsedByECSCreateCluster:  
+    Description: Flag used by ECS Create Cluster Wizard  
+    Value: &#39;true&#39;  
+  TemplateVersion:  
+    Description: The version of the template used by Create Cluster Wizard  
+    Value: &#39;2.0.0&#39;  
+</code></pre><p>Here is the parameters for the template</p>
+<p>AsgMaxSize: 1</p>
+<p>DeviceName: /dev/xvdcz</p>
+<p>EbsVolumeSize: 22</p>
+<p>EbsVolumeType: gp2</p>
+<p>EcsAmiId: ami-0a3f70f0111af1d29</p>
+<p>EcsClusterName: testweb-clu</p>
+<p>EcsEndpoint:</p>
+<p>EcsInstanceType: t2.micro</p>
+<p>IamRoleInstanceProfile: arn:aws:iam::123456789103:instance-profile/ecsInstanceRole</p>
+<p>IamSpotFleetRoleArn:</p>
+<p>IsWindows: false</p>
+<p>KeyName: tom-testkey</p>
+<p>SecurityGroupId: sg-014e7a96be118e111</p>
+<p>SecurityIngressCidrIp: 0.0.0.0/0</p>
+<p>SecurityIngressFromPort: 80</p>
+<p>SecurityIngressToPort: 80</p>
+<p>SpotAllocationStrategy: diversified</p>
+<p>SpotPrice:</p>
+<p>SubnetCidr1: 10.0.0.0/24</p>
+<p>SubnetCidr2: 10.0.1.0/24</p>
+<p>SubnetCidr3:</p>
+<p>SubnetIds: subnet-057b8e2cd11183e28</p>
+<p>UserData: #!/bin/bash echo ECS_CLUSTER=testweb-clu &raquo; /etc/ecs/ecs.config;echo ECS_BACKEND_HOST= &raquo; /etc/ecs/ecs.config;</p>
+<p>UseSpot: false</p>
+<p>VpcAvailabilityZones: ap-southeast-1a,ap-southeast-1b,ap-southeast-1c</p>
+<p>VpcCidr: 10.0.0.0/16</p>
+<p>VpcId: vpc-08d111d48c2f68111</p>
+<p><strong>3. Create Service</strong></p>
+<p>Back in ECS, click the Cluster name.</p>
+<p>Under Services tab, click Create.</p>
+<p>Choose EC2 as the Launch Type, select the Task Definition we created in step1, select the cluster we created in step 2. Set <strong>Number of tasks</strong> to 1.</p>
+<p>Use <strong>AZ Balanced Spread</strong> for <strong>Task Placement</strong>.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-IS4BEcRirTo/W8a_XF8zl1I/AAAAAAAAKWk/Hp6ATq-rcoIW4pngMwrZIr4XacCdOqxawCHMYCw/s1600-h/image%255B20%255D"><img src="https://lh3.googleusercontent.com/-VqrZbvSBVpo/W8a_YhkXZ2I/AAAAAAAAKWo/aIITCq8C81A9wIX04xLJzVL7WMUO81ldQCHMYCw/image_thumb%255B6%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>Leave everything unchanged in <strong>Configure network</strong>.</p>
+<p>Leave AutoScaling as “Do not adjust…”.</p>
+<p>Click <strong>Create Service</strong> to create the service.</p>
+<p><strong>4. Test</strong></p>
+<p>Once the service is successfully created, The cluster will then start to provision the Container Instance and deploy the container image onto it. This process does seem to take time. In my case, it took around 55 minutes for the container to be started! So you definitely want to warm up your cluster in production.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-hCZOFQmxD38/W8a_Zo1scJI/AAAAAAAAKWs/5FjRLEmT8T87T-9ElHHIzQLw8A7zQ1bQQCHMYCw/s1600-h/image%255B23%255D"><img src="https://lh3.googleusercontent.com/-hyMAslr4nqE/W8a_avbWPpI/AAAAAAAAKWw/ZLJ289pC2lksaQ_LJmJGpNWiI29dCftxQCHMYCw/image_thumb%255B7%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>Under Tasks, you should see a running task there.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-wTWwbrHucLA/W8a_bZrGM9I/AAAAAAAAKW0/2kQUOsimCt0Gd47JmV8BVL7Rl_IA260LgCHMYCw/s1600-h/image%255B26%255D"><img src="https://lh3.googleusercontent.com/-zdvoDS4eG1M/W8a_cuux0iI/AAAAAAAAKW4/DeOPv5WeIewCn0guhW7Whxev19MXOtW9ACHMYCw/image_thumb%255B8%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>Go to EC2 and find the public IP of the Container Instance.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-OH7PtlYaeoI/W8a_dgmJzCI/AAAAAAAAKW8/vwJ86ngNoY0eA8sgvGIjoYtEMpS1HT1QQCHMYCw/s1600-h/image%255B29%255D"><img src="https://lh3.googleusercontent.com/-M2MJ7-EfpKc/W8a_fDyzrBI/AAAAAAAAKXA/zZQ-V24F9dcGIjlKhtB7_rVLKdsILL5ZQCHMYCw/image_thumb%255B9%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>In browser, type <a class="gblog-markdown__link" href="http://publicIP">http://publicIP</a> and you should see the boring but exciting Hello World message!</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-HCtt7aR0V0o/W8a_gZTIUTI/AAAAAAAAKXE/PlfRNdumZk0iaV3EjvHZBTV8Ij6sqiqDACHMYCw/s1600-h/image%255B32%255D"><img src="https://lh3.googleusercontent.com/-7pF37V9EmUk/W8a_hY9w4zI/AAAAAAAAKXM/XOk9GOgnEGYWPrP53PkMEXgl3ecK3m29gCHMYCw/image_thumb%255B10%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>In case you run into any issues, like the task refuse to launch, one place to look is the ECS Agent log on the Container Instance. The log can be found at /var/logs.</p>
+
+
+        </section>
+    </article>
+
+        </main>
+
+        <footer class="gblog-footer">
+    <nav class="container">
+        <section class="flex flex-wrap align-center">
+            
+            <span class="gblog-footer__item">
+                <svg class="icon gblog_rss_feed"><use xlink:href="#gblog_rss_feed"></use></svg>
+                <a href='/feed.xml' class="gblog-footer__link">Atom Feed</a>
+            </span>
+            
+            
+            
+            
+        </section>
+        <section class="flex flex-wrap align-center">
+            <span class="gblog-footer__item">
+                Built with <a href="https://gohugo.io/" class="gblog-footer__link">Hugo</a> and
+                <svg class="icon gblog_heart"><use xlink:href="#gblog_heart"></use></svg>
+            </span>
+        </section>
+        
+        <section class="flex flex-wrap align-center">
+            <span class="gblog-footer__item">
+                Hosted on <a href="https://cloudflare.com/" class="gblog-footer__link">Cloudflare</a>
+            </span>
+        </section>
+        
+    </nav>
+</footer>
+
+    </div>
+
+    
+<script defer src="/js/clipboard-27784b7376.min.js"></script>
+<script defer src="/js/clipboard-loader-f0b5fbd5f6.min.js"></script>
+
+
+</body>
+</html>

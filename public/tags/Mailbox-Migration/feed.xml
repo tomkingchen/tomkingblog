@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <generator uri="https://gohugo.io/" version="0.97.3">Hugo</generator><title type="html"><![CDATA[Mailbox Migration on Tom Tech Blog]]></title>
+    
+        <subtitle type="html"><![CDATA[Share and Learn]]></subtitle>
+    
+    
+    
+            <link href="/tags/Mailbox-Migration/" rel="alternate" type="text/html" title="HTML" />
+            <link href="/tags/Mailbox-Migration/feed.xml" rel="self" type="application/atom+xml" title="Atom" />
+    <updated>2022-09-17T10:49:41+10:00</updated>
+    
+    <id>/tags/Mailbox-Migration/</id>
+        
+        <entry>
+            <title type="html"><![CDATA[Receive error: Target mailbox doesn't have an SMTP proxy matching '.mail.onmicrosoft.com' when move mailbox to Office 365]]></title>
+            <link href="/2014/04/office-365-exchange-hybrid-deployment.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2014/04/office-365-exchange-hybrid-deployment.html</id>
+            
+            <published>2014-04-06T23:51:00-07:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>Recently I was working on Exchange Hybrid Deployment for one of our customer. The Hybrid Configuration process itself went smoothly. No errors for HCW. </p>
+<p>The problems came when I tried to move mailbox to Exchange Online. The migration fails with error:<br>
+<strong>Target mailbox doesn&rsquo;t have an SMTP proxy matching &lsquo;<domain>.mail.onmicrosoft.com&rsquo;&quot;</strong></p>
+<p>To check that I ran the following command against the On-premise Exchange.</p>
+<p>Get-Mailbox &ldquo;O365 Test5&rdquo; | fl and check the EmailAddress filed</p>
+<p><a class="gblog-markdown__link--raw" href="http://3.bp.blogspot.com/-xfnTdyJyULk/U0JKuLIyF0I/AAAAAAAAJCI/N_bl6fxO_0o/s1600/getmailbox.png"><img src="http://3.bp.blogspot.com/-xfnTdyJyULk/U0JKuLIyF0I/AAAAAAAAJCI/N_bl6fxO_0o/s1600/getmailbox.png" alt=""  /></a></p>
+<p>Then I ran get-mailuser in Exchange Online. Because the mailbox hasn&rsquo;t been migrated, the user still show up as Mailuser(Contact) in Office 365.</p>
+<p>Get-MailUser &ldquo;o365 test6&rdquo; |fl</p>
+<p><a class="gblog-markdown__link--raw" href="http://4.bp.blogspot.com/-uIrsas0ytfw/U0JINlFHZDI/AAAAAAAAJB0/mxOOdYZj5S4/s1600/getmailuser.png"><img src="http://4.bp.blogspot.com/-uIrsas0ytfw/U0JINlFHZDI/AAAAAAAAJB0/mxOOdYZj5S4/s1600/getmailuser.png" alt=""  /></a></p>
+<p>Noticed the proxy address &ldquo;contoso.mail.onmicrosoft.com&rdquo; does not show up into the Azure AD object. The user object in Office 365  only has our primary SMTP address &ldquo;<a class="gblog-markdown__link" href="mailto:username@contoso.com">username@contoso.com</a>&rdquo; and &ldquo;<a class="gblog-markdown__link" href="mailto:username@contoso.onmicrosoft.com">username@contoso.onmicrosoft.com</a>&rdquo; stamped. &ldquo;CONTOSO.MAIL.onmicrosoft.com&rdquo; is missing from the address list.</p>
+<p>After review the DirSync rules, I notice for user object, the proxyAddress attribute does not have an &ldquo;Import&rdquo; rule associated with it. As a test I manually added a Import rule for &ldquo;proxyAddresses&rdquo;.<br>
+The rule details are:</p>
+<p>cd.all:proxyAddresses-&gt;mv.all:proxyAddresses</p>
+<p><a class="gblog-markdown__link--raw" href="http://1.bp.blogspot.com/-sV_2gnEWJ54/UzpSrP0C_LI/AAAAAAAAJBU/JshPC8DHPjU/s1600/dirsync&#43;rule.png"><img src="http://1.bp.blogspot.com/-sV_2gnEWJ54/UzpSrP0C_LI/AAAAAAAAJBU/JshPC8DHPjU/s1600/dirsync&#43;rule.png" alt=""  /></a></p>
+<p>After kicked off a full sync by run &ldquo;Start-OnlineCoexistenceSync&rdquo;. </p>
+<p>&ldquo;get-mailuser&rdquo; was able to return with the SMTP addresses &ldquo;contoso.mail.onmicrosoft.com&rdquo;. Mailbox migration to Office 365 went successfully after that.</p>
+]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/Exchange-Hybrid" term="Exchange-Hybrid" label="Exchange Hybrid" />
+                             
+                                <category scheme="/tags/mail.onmicrosoft.com" term="mail.onmicrosoft.com" label="mail.onmicrosoft.com" />
+                             
+                                <category scheme="/tags/Mailbox-Migration" term="Mailbox-Migration" label="Mailbox Migration" />
+                             
+                                <category scheme="/tags/Office-365" term="Office-365" label="Office 365" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+</feed>

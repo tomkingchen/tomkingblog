@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <generator uri="https://gohugo.io/" version="0.97.3">Hugo</generator><title type="html"><![CDATA[Exchange Hybrid on Tom Tech Blog]]></title>
+    
+        <subtitle type="html"><![CDATA[Share and Learn]]></subtitle>
+    
+    
+    
+            <link href="/tags/Exchange-Hybrid/" rel="alternate" type="text/html" title="HTML" />
+            <link href="/tags/Exchange-Hybrid/feed.xml" rel="self" type="application/atom+xml" title="Atom" />
+    <updated>2022-09-17T10:49:41+10:00</updated>
+    
+    <id>/tags/Exchange-Hybrid/</id>
+        
+        <entry>
+            <title type="html"><![CDATA[On Premise Mailbox user missing in Exchange Online GAL]]></title>
+            <link href="/2015/11/on-premise-mailbox-user-does-not-show.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2015/11/on-premise-mailbox-user-does-not-show.html</id>
+            
+            <published>2015-11-01T20:12:00-08:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>Ran into an interesting issue with one of our Exchange Online customer. Thought it probably worth sharing with the solution I found.</p>
+<p>The customer has an Exchange Hybrid setup. Recently some of  Office 365 Exchange Online users complain they cannot email to a particular on premise mailbox: <a class="gblog-markdown__link" href="mailto:Paul.Smith@contoso.com">Paul.Smith@contoso.com</a>. The user bascialy does not show up in Exchange Online GAL. The on premise mailbox is working fine and other on premise staff can send emails to it without issue. When I checked Exchange Online, I cannot find the contact object for this account.</p>
+<p>Initially I thought it could be for some reason the user&rsquo;s on premise AD object has not been synced properly to Office 365. So I tried with recreating the object in Office 365 by moving the on premise AD account to a non-synced OU. This delete the user&rsquo;s Office 365 account. Then I move the on premise account back into its original OU. After re-sync the account back into Office 365, it still refuse to show up in Exchange Online contact list.</p>
+<p>As always, I contacted Microsoft support to try get an answer. But that didn&rsquo;t prove to be too useful either. The suggestion MS provided is to &ldquo;Change our Email domain <strong>contoso.com</strong> from Authority to Internal Relay&rdquo;. This issue only affects a single user out of 500 and MS is suggesting to change a Global setting. I give them up quickly and focus on research the issue myself.</p>
+<p>I then took a close look at the user&rsquo;s Office 365 account, while compare it with other accounts I notice a difference in the field of <strong>CloudExchangeRecipientDisplayType</strong>. </p>
+<p>Get-MSOLUser –UserPrincipalName <em>paul.smith@contoso.com</em> | fl &gt; c:\paul.txt</p>
+<p>Get-MSOLUser –UserPrincipalName <em>tom.leigh@contoso.com</em> | fl &gt; c:\tom.txt</p>
+<p><strong>Paul&rsquo;s user details</strong></p>
+<p><img src="file:///C:/Users/chent/AppData/Local/Temp/enhtmlclip/Image%2821%29.png" alt=""  /></p>
+<p><a class="gblog-markdown__link--raw" href="http://3.bp.blogspot.com/-N2nK4e3yCJY/VjLAxmgWt7I/AAAAAAAAJKg/8HdHpZ62UUo/s1600/pauldetail.png"><img src="http://3.bp.blogspot.com/-N2nK4e3yCJY/VjLAxmgWt7I/AAAAAAAAJKg/8HdHpZ62UUo/s320/pauldetail.png" alt=""  /></a></p>
+<p><strong>Another user details</strong></p>
+<p><a class="gblog-markdown__link--raw" href="http://1.bp.blogspot.com/-YeM7H3u7D3I/VjLBDL5g_HI/AAAAAAAAJKo/V_sT-LIQQW0/s1600/userdetail.png"><img src="http://1.bp.blogspot.com/-YeM7H3u7D3I/VjLBDL5g_HI/AAAAAAAAJKo/V_sT-LIQQW0/s320/userdetail.png" alt=""  /></a></p>
+<p><img src="file:///C:/Users/chent/AppData/Local/Temp/enhtmlclip/Image%2822%29.png" alt=""  /></p>
+<p>According to this <a class="gblog-markdown__link" href="http://blogs.technet.com/b/johnbai/archive/2013/09/11/o365-msexchangerecipienttypedetails.aspx">article</a>, -2147483642 means &ldquo;SynedMailboxUser&rdquo;. This is the recipient type of Paul&rsquo;s Office 365 account. So now we know what&rsquo;s wrong with Paul&rsquo;s account.</p>
+<p>To fix the issue, we just need to set <strong>CloudExchangeRecipientDisplayType</strong> with the correct value. To do so we need to make change to Paul&rsquo;s on premise AD account.</p>
+<p>In on premise ADUC, enable <strong>Advanced Features</strong> in view. Open the user properties and select <strong>Attribute Editor</strong> tab.</p>
+<p>Change following fields</p>
+<p><strong>msExchRecipietnDisplayType -&gt; 6</strong></p>
+<p><strong>msExchRecipientTypeDetails -&gt; 128</strong></p>
+<p><strong>targetAddress -&gt; <a class="gblog-markdown__link" href="mailto:paul.smith@contoso.com">paul.smith@contoso.com</a></strong></p>
+<p>Make sure you take a screenshot of the existing value</p>
+<p><img src="file:///C:/Users/chent/AppData/Local/Temp/enhtmlclip/Image%2823%29.png" alt=""  /></p>
+<p><img src="file:///C:/Users/chent/AppData/Local/Temp/enhtmlclip/Image%2824%29.png" alt=""  /></p>
+<p>After change the value, perform a AD SYNC from DirSync or run <strong>Start-OnlineCoexistenceSync</strong>. </p>
+<p>In the SYNC log, confirm the user object has been updated. If you go into the Exchange Online contact list, Paul&rsquo;s email address should be available now.</p>
+<p>Once confirmed user email address available in Office 365 again, we need to reverse the above change to the on premise user account. Otherwise, Paul will not be able to access his on premise mailbox.</p>
+<p>To do so, simply apply the following changes</p>
+<p><strong>msExchRecipietnDisplayType -&gt; 1073741824</strong></p>
+<p><strong>msExchRecipientTypeDetails -&gt; 1</strong></p>
+<p><strong>targetAddress -&gt; <not set></strong></p>
+]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/GAL" term="GAL" label="GAL" />
+                             
+                                <category scheme="/tags/Exchange-Hybrid" term="Exchange-Hybrid" label="Exchange Hybrid" />
+                             
+                                <category scheme="/tags/Office-365" term="Office-365" label="Office 365" />
+                             
+                                <category scheme="/tags/Cloud" term="Cloud" label="Cloud" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+        
+        <entry>
+            <title type="html"><![CDATA[Receive error: Target mailbox doesn't have an SMTP proxy matching '.mail.onmicrosoft.com' when move mailbox to Office 365]]></title>
+            <link href="/2014/04/office-365-exchange-hybrid-deployment.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2014/04/office-365-exchange-hybrid-deployment.html</id>
+            
+            <published>2014-04-06T23:51:00-07:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>Recently I was working on Exchange Hybrid Deployment for one of our customer. The Hybrid Configuration process itself went smoothly. No errors for HCW. </p>
+<p>The problems came when I tried to move mailbox to Exchange Online. The migration fails with error:<br>
+<strong>Target mailbox doesn&rsquo;t have an SMTP proxy matching &lsquo;<domain>.mail.onmicrosoft.com&rsquo;&quot;</strong></p>
+<p>To check that I ran the following command against the On-premise Exchange.</p>
+<p>Get-Mailbox &ldquo;O365 Test5&rdquo; | fl and check the EmailAddress filed</p>
+<p><a class="gblog-markdown__link--raw" href="http://3.bp.blogspot.com/-xfnTdyJyULk/U0JKuLIyF0I/AAAAAAAAJCI/N_bl6fxO_0o/s1600/getmailbox.png"><img src="http://3.bp.blogspot.com/-xfnTdyJyULk/U0JKuLIyF0I/AAAAAAAAJCI/N_bl6fxO_0o/s1600/getmailbox.png" alt=""  /></a></p>
+<p>Then I ran get-mailuser in Exchange Online. Because the mailbox hasn&rsquo;t been migrated, the user still show up as Mailuser(Contact) in Office 365.</p>
+<p>Get-MailUser &ldquo;o365 test6&rdquo; |fl</p>
+<p><a class="gblog-markdown__link--raw" href="http://4.bp.blogspot.com/-uIrsas0ytfw/U0JINlFHZDI/AAAAAAAAJB0/mxOOdYZj5S4/s1600/getmailuser.png"><img src="http://4.bp.blogspot.com/-uIrsas0ytfw/U0JINlFHZDI/AAAAAAAAJB0/mxOOdYZj5S4/s1600/getmailuser.png" alt=""  /></a></p>
+<p>Noticed the proxy address &ldquo;contoso.mail.onmicrosoft.com&rdquo; does not show up into the Azure AD object. The user object in Office 365  only has our primary SMTP address &ldquo;<a class="gblog-markdown__link" href="mailto:username@contoso.com">username@contoso.com</a>&rdquo; and &ldquo;<a class="gblog-markdown__link" href="mailto:username@contoso.onmicrosoft.com">username@contoso.onmicrosoft.com</a>&rdquo; stamped. &ldquo;CONTOSO.MAIL.onmicrosoft.com&rdquo; is missing from the address list.</p>
+<p>After review the DirSync rules, I notice for user object, the proxyAddress attribute does not have an &ldquo;Import&rdquo; rule associated with it. As a test I manually added a Import rule for &ldquo;proxyAddresses&rdquo;.<br>
+The rule details are:</p>
+<p>cd.all:proxyAddresses-&gt;mv.all:proxyAddresses</p>
+<p><a class="gblog-markdown__link--raw" href="http://1.bp.blogspot.com/-sV_2gnEWJ54/UzpSrP0C_LI/AAAAAAAAJBU/JshPC8DHPjU/s1600/dirsync&#43;rule.png"><img src="http://1.bp.blogspot.com/-sV_2gnEWJ54/UzpSrP0C_LI/AAAAAAAAJBU/JshPC8DHPjU/s1600/dirsync&#43;rule.png" alt=""  /></a></p>
+<p>After kicked off a full sync by run &ldquo;Start-OnlineCoexistenceSync&rdquo;. </p>
+<p>&ldquo;get-mailuser&rdquo; was able to return with the SMTP addresses &ldquo;contoso.mail.onmicrosoft.com&rdquo;. Mailbox migration to Office 365 went successfully after that.</p>
+]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/Exchange-Hybrid" term="Exchange-Hybrid" label="Exchange Hybrid" />
+                             
+                                <category scheme="/tags/mail.onmicrosoft.com" term="mail.onmicrosoft.com" label="mail.onmicrosoft.com" />
+                             
+                                <category scheme="/tags/Mailbox-Migration" term="Mailbox-Migration" label="Mailbox Migration" />
+                             
+                                <category scheme="/tags/Office-365" term="Office-365" label="Office 365" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+</feed>

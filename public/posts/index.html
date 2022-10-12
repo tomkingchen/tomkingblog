@@ -22,7 +22,7 @@
     
 
 
-    <title>Posts | My IT Blog</title>
+    <title>Posts | Tom Tech Blog</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
@@ -81,10 +81,10 @@
         <a class="gblog-header__link" rel="me" href="/">
             <span class="gblog-brand flex align-center justify-center">
                 <img class="gblog-brand__img" src="/brand.svg" alt="">
-                My IT Blog
+                Tom Tech Blog
             </span>
             
-            <span class="gblog-brand__subtitle flex align-center justify-center">Sharing my journey in IT</span>
+            <span class="gblog-brand__subtitle flex align-center justify-center">Share and Learn</span>
             
         </a>
     </div>
@@ -103,6 +103,66 @@
         
         
         
+        <li>
+            <a class="gblog-nav__entry " href="/tags/AWS/">AWS</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Azure/">Azure</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Cloud/">Cloud</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Exchange-Hybrid/">Exchange Hybrid</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/GAL/">GAL</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Mailbox-Migration/">Mailbox Migration</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/Office-365/">Office 365</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/PowerShell/">PowerShell</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/VPN/">VPN</a>
+        </li>
+        
+        
+        
+        <li>
+            <a class="gblog-nav__entry " href="/tags/mail.onmicrosoft.com/">mail.onmicrosoft.com</a>
+        </li>
+        
+        
+        
         
     </ul>
 </nav>
@@ -117,14 +177,139 @@
     
     <article class="gblog-post">
         <header class="gblog-post__header">
-            <h1><a href="/posts/move-to-cloudflare/">Move to Cloudflare</a></h1>
+            <h1><a href="/posts/build-full-stack-webapp-using-worker-and-github-pages/">Build Full Stack Webapp Using Cloudflare Worker and Github Pages</a></h1>
         </header>
 
         <section class="gblog-markdown">
-            Move my blog to Cloudflare Pages    I work a lot with Cloudflare. It will be helpful to have better understanding of Cloudflare Pages.
-Code block    This is some testing Python code.
-a = 100 b = &#34;200&#34; c = a + b print(&#34;The result is: $c&#34;) This is some testing Javascript code.
-const a = 100 const b = &#34;200&#34; const c = a + b console.
+            I have been following the COVID situation in Shanghai lately. Intentionally or not, it is surprisingly hard to find a daily chart to reflect the proper case numbers overthere. To solve this problem, I decided to build a webapp just does exactly that: a simple chart the displays Shanghai daily COVID cases that includes both symptomatic and asymptomatic cases.
+The overall design includes a backend API that provides daily numbers in JSON format, and a front-end page that presents the data in the form of an area chart.
+        </section>
+        <div class="gblog-post__readmore">
+            
+            <a class="flex-inline align-center fake-link" title="Read full post" href="/posts/build-full-stack-webapp-using-worker-and-github-pages/">Read full post</a>
+            
+        </div>
+
+        <footer class="gblog-post__footer">
+            <span class="no-wrap">
+                <svg class="icon gblog_date"><use xlink:href="#gblog_date"></use></svg>
+                <span class="gblog-post__tag">
+                    <time datetime="2022-04-27T22:47:47&#43;10:00">
+                        
+                            Updated on
+                        
+                        Apr 27, 2022
+                    </time>
+                </span>
+            </span>
+
+            <span class="no-wrap">
+                <svg class="icon gblog_timer"><use xlink:href="#gblog_timer"></use></svg>
+                <span class="gblog-post__tag">3 min read</span>
+            </span>
+
+            
+
+            
+            
+
+            
+            
+        </footer>
+    </article>
+    
+    <article class="gblog-post">
+        <header class="gblog-post__header">
+            <h1><a href="/posts/setup-kubernetes-cluster/">Setup Kubernetes Cluster from scratch</a></h1>
+        </header>
+
+        <section class="gblog-markdown">
+            This post I will try to go through the steps I took to build a Kubernetes cluster from scratch.
+The physcial host is an old Dell Latitude laptop with 8GB memory, which runs VMware ESXi 6.7. The plan is to run 3 nodes on it with one of the VM set as master. Each server runs Ubuntu 20.04. I will skip the VM building steps here as our focus is Kubernetes.
+        </section>
+        <div class="gblog-post__readmore">
+            
+            <a class="flex-inline align-center fake-link" title="Read full post" href="/posts/setup-kubernetes-cluster/">Read full post</a>
+            
+        </div>
+
+        <footer class="gblog-post__footer">
+            <span class="no-wrap">
+                <svg class="icon gblog_date"><use xlink:href="#gblog_date"></use></svg>
+                <span class="gblog-post__tag">
+                    <time datetime="2022-01-29T16:25:15&#43;11:00">
+                        
+                        Jan 29, 2022
+                    </time>
+                </span>
+            </span>
+
+            <span class="no-wrap">
+                <svg class="icon gblog_timer"><use xlink:href="#gblog_timer"></use></svg>
+                <span class="gblog-post__tag">4 min read</span>
+            </span>
+
+            
+
+            
+            
+
+            
+            
+        </footer>
+    </article>
+    
+    <article class="gblog-post">
+        <header class="gblog-post__header">
+            <h1><a href="/posts/cloudflare-cli-tool/">I wrote a Cloudflare CLI tool</a></h1>
+        </header>
+
+        <section class="gblog-markdown">
+            I just wrote a Cloudflare CLI tool called flare 🔥! Check it out from my GitHub repo git@github.com:tomkingchen/cloudflare-cli.git.
+The tool does some basic queries to Cloudflare API and retrieves information based on the parameters provided.
+The reason for creating the tool is mainly to help myself to quickly identify information hard to find through Cloudflare dashboard like Firewall rule ID.
+The current version is to focus on display information only rather than modifing configuration within Cloudflare.
+        </section>
+        <div class="gblog-post__readmore">
+            
+            <a class="flex-inline align-center fake-link" title="Read full post" href="/posts/cloudflare-cli-tool/">Read full post</a>
+            
+        </div>
+
+        <footer class="gblog-post__footer">
+            <span class="no-wrap">
+                <svg class="icon gblog_date"><use xlink:href="#gblog_date"></use></svg>
+                <span class="gblog-post__tag">
+                    <time datetime="2021-10-16T15:07:37&#43;11:00">
+                        
+                        Oct 16, 2021
+                    </time>
+                </span>
+            </span>
+
+            <span class="no-wrap">
+                <svg class="icon gblog_timer"><use xlink:href="#gblog_timer"></use></svg>
+                <span class="gblog-post__tag">2 min read</span>
+            </span>
+
+            
+
+            
+            
+
+            
+            
+        </footer>
+    </article>
+    
+    <article class="gblog-post">
+        <header class="gblog-post__header">
+            <h1><a href="/posts/move-to-cloudflare/">Bye Bye Google Blogger🖐, Hello Cloudflare Pages😘</a></h1>
+        </header>
+
+        <section class="gblog-markdown">
+            I had enough of Google Blogger! It has terrible editing UI for and I constantly receiving SPAM comments for my posts😤. Time to move my blog off to somewhere better! I was thinking to run a Wordpress server. Though I think it&rsquo;s way cooler to run my blog simplely without worrying about backend infrastructure.
+After look around, I ended up using Cloudflare Pages to publish my blog. This allows me to write my posts with Markdown and then generate static html pages using Hugo.
         </section>
         <div class="gblog-post__readmore">
             
@@ -136,16 +321,61 @@ const a = 100 const b = &#34;200&#34; const c = a + b console.
             <span class="no-wrap">
                 <svg class="icon gblog_date"><use xlink:href="#gblog_date"></use></svg>
                 <span class="gblog-post__tag">
-                    <time datetime="2021-09-04T18:36:53&#43;10:00">
+                    <time datetime="2021-09-19T15:38:46&#43;10:00">
                         
-                        Sep 4, 2021
+                            Updated on
+                        
+                        Sep 19, 2021
                     </time>
                 </span>
             </span>
 
             <span class="no-wrap">
                 <svg class="icon gblog_timer"><use xlink:href="#gblog_timer"></use></svg>
-                <span class="gblog-post__tag">1 min read</span>
+                <span class="gblog-post__tag">2 min read</span>
+            </span>
+
+            
+
+            
+            
+
+            
+            
+        </footer>
+    </article>
+    
+    <article class="gblog-post">
+        <header class="gblog-post__header">
+            <h1><a href="/2021/08/setup-cloudflare-for-s3-bucket.html">Setup Cloudflare for S3 Bucket</a></h1>
+        </header>
+
+        <section class="gblog-markdown">
+            One way to improve website performance is to use CDN to distribute the static contents of your site. S3 is a common place to host such type contents. In this post, I will show you how to publish a S3 bucket using Cloudflare. In fact, the screen shots used in this blogpost is published exactly through this manner.
+Setup S3 Bucket Permissions    This is an optional step which adds a S3 bucket policy to your bucket.
+        </section>
+        <div class="gblog-post__readmore">
+            
+            <a class="flex-inline align-center fake-link" title="Read full post" href="/2021/08/setup-cloudflare-for-s3-bucket.html">Read full post</a>
+            
+        </div>
+
+        <footer class="gblog-post__footer">
+            <span class="no-wrap">
+                <svg class="icon gblog_date"><use xlink:href="#gblog_date"></use></svg>
+                <span class="gblog-post__tag">
+                    <time datetime="2021-09-19T15:05:42&#43;10:00">
+                        
+                            Updated on
+                        
+                        Sep 19, 2021
+                    </time>
+                </span>
+            </span>
+
+            <span class="no-wrap">
+                <svg class="icon gblog_timer"><use xlink:href="#gblog_timer"></use></svg>
+                <span class="gblog-post__tag">4 min read</span>
             </span>
 
             
@@ -164,8 +394,10 @@ const a = 100 const b = &#34;200&#34; const c = a + b console.
     <div class="gblog-paging__item gblog-paging__item--prev">
     
     </div>
-    <div class="gblog-paging__state">Page 1 of 1</div>
+    <div class="gblog-paging__state">Page 1 of 8</div>
     <div class="gblog-paging__item gblog-paging__item--next">
+    
+        <a class="flex-inline align-center fake-link no-wrap" href="/posts/page/2/">NEXT</a>
     
     </div>
 </nav>

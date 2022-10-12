@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <generator uri="https://gohugo.io/" version="0.97.3">Hugo</generator><title type="html"><![CDATA[PowerShell on Tom Tech Blog]]></title>
+    
+        <subtitle type="html"><![CDATA[Share and Learn]]></subtitle>
+    
+    
+    
+            <link href="/tags/PowerShell/" rel="alternate" type="text/html" title="HTML" />
+            <link href="/tags/PowerShell/feed.xml" rel="self" type="application/atom+xml" title="Atom" />
+    <updated>2022-09-17T10:49:41+10:00</updated>
+    
+    <id>/tags/PowerShell/</id>
+        
+        <entry>
+            <title type="html"><![CDATA[Package and deploy a PowerShell Lambda function with custom modules]]></title>
+            <link href="/2020/06/package-and-deploy-powershell-lambda.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2020/06/package-and-deploy-powershell-lambda.html</id>
+            
+            <published>2020-06-06T05:20:00-07:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>Recently I had the need to create a Lambda function with PowerShell 7. The function is to synchronize data between two REST APIs. It&rsquo;s fairly simple, but does need to use a custom made module. I spent quite bit time to find out how to deploy PowerShell Lambdas with custom modules. Thought might write a guide to help people want to do the same.   </p>
+<p>My script is fairly simple, it gets a list of users from one API and then convert it to a XML format object and export into the target API. To reuse some of the code, The script requires AWS.Tools module as well as a custom made module, let&rsquo;s call it CAT. The CAT is a module contains some functions that are invoked by the main script. The inital lines of my main script look like below:</p>
+<pre tabindex="0"><code>#Requires -Modules @{ModuleName=&#39;AWS.Tools.Common&#39;;ModuleVersion=&#39;4.0.5.0&#39;}  
+#Requires -Modules @{ModuleName=&#39;AWS.Tools.SecretsManager&#39;;ModuleVersion=&#39;4.0.5.0&#39;}  
+#Requires -Modules CAT 
+</code></pre><p>In addition to install the <strong>AWS.Tools</strong> modules, I manually copied my CAT module folder to the <strong>$Env:PSModulePath</strong>.</p>
+<p>The nex thing is to package the code into a zip file along with all required modules. To do so, install <strong>AWSLambdaPSCore</strong> module and run this PowerShell command:</p>
+<pre tabindex="0"><code>New-AWSPowerShellLambdaPackage -ScriptPath &#34;../functions/FunctionName.ps1&#34; -outputPackage &#34;FunctionName.zip&#34;
+</code></pre><p>You should see the script and modules are all packaged as shown below.</p>
+<pre tabindex="0"><code>Staging deployment at C:\\Users\\tom\\AppData\\Local\\Temp\\myfunction  
+Configuring PowerShell to version 7.0.0  
+Generating C# project C:\\Users\\tom\\AppData\\Local\\Temp\\myfunction\\myfunction.csproj used to create Lambda function bundle.  
+Generating C:\\Users\\tom\\AppData\\Local\\Temp\\myfunction\\Bootstrap.cs to load PowerShell script and required modules in Lambda environment.  
+Generating aws-lambda-tools-defaults.json config file with default values used when publishing project.  
+Copying PowerShell script to staging directory  
+Copying local module AWS.Tools.Common(4.0.5.0) from C:\\Users\\tom\\OneDrive\\Documents\\PowerShell\\Modules\\AWS.Tools.Common\\4.0.5.0  
+Copying local module AWS.Tools.SecretsManager(4.0.5.0) from C:\\Users\\tom\\OneDrive\\Documents\\PowerShell\\Modules\\AWS.Tools.SecretsManager\\4.0.5.0  
+Copying local module CAT(0.0.2) from C:\\program files\\powershell\\7\\Modules\\CAT  
+Resolved full output package path as C:\\Users\\tom\\Dropbox\\github\\myproject\\deploy\\myfunction.zip  
+Creating deployment package at C:\\Users\\tom\\Dropbox\\github\\myproject\\deploy\\myfunction.zip  
+Restoring .NET Lambda deployment tool  
+Initiate packaging  
+When deploying this package to AWS Lambda you will need to specify the function handler. The handler for this package is: myfunction::myfunction.Bootstrap::ExecuteFunction. To request Lambda to invoke a specific PowerShell function in your script specify the name of the PowerShell function in the environment variable AWS\_POWERSHELL\_FUNCTION\_HANDLER when publishing the package.  
+LambdaHandler                                         PathToPackage                                                         PowerShellFunctionHandlerEnvVar  
+\-------------                                         -------------                                                         -------------------------------  
+myfunction::myfunction.Bootstrap::ExecuteFunction C:\\Users\\tom\\Dropbox\\github\\myproject\\deploy\\myfunction.zip AWS\_POWERSHELL\_FUNCTION\_HANDLER
+</code></pre><p>The steps below are not required if you have a CICD pipeline built up like me. As soon as I push my updated code and package to GitHub, the pipeline will automatically upload the package and deploy it. But if don&rsquo;t, read on! </p>
+<p>The next step is to create a S3 bucket to host your package. You can skip this step if you already have a designated bucket for such purpose.</p>
+<p>After created the bucket, we will then create a <strong>SAM template</strong>. SAM template is basically a transformed CloudFormation template. It allows us to add all the neccessary bits like Events and DeadLetterQueue under AWS::Serverless::Function resource. Here&rsquo;s a simple example. Pay close attention to <strong>CodeUri</strong>. Notice it&rsquo;s pointing to the local zip file instead of a S3 URL? This is by purpose. I will explain in next step.</p>
+<pre tabindex="0"><code>AWSTemplateFormatVersion: &#39;2010-09-09&#39;  
+Transform: &#39;AWS::Serverless-2016-10-31&#39;  
+Resources:  
+  PopCycler:  
+    Type: &#39;AWS::Serverless::Function&#39;  
+    Properties:  
+      Handler: myfunction::myfunction.Bootstrap::ExecuteFunction  
+      Runtime: dotnetcore3.1  
+      **CodeUri: &#39;./myfunction.zip&#39;**  
+      Role:  
+        Fn::GetAtt:  
+        - LambdaRole  
+        - Arn  
+      Environment:  
+        Variables:  
+          ENV: dev  
+          CATURL: https://dev.CAT.com  
+          CATAPPID: Abc12345  
+          CATSECRETID: CAT-api-key  
+          VENDORSECRETID: myproject  
+      Events:  
+        ScanInterval:  
+          Type: Schedule  
+          Properties:  
+            Schedule: &#39;rate(1 day)&#39;  
+      Timeout: 300  
+      MemorySize: 256  
+      Tags:  
+        owner: tom  
+  LambdaRole:  
+    Type: &#39;AWS::IAM::Role&#39;  
+    Properties:  
+      RoleName: myproject-lambdarole  
+      Tags:  
+        -   
+          Key: &#39;owner&#39;  
+          Value: &#39;myteam&#39;  
+      ManagedPolicyArns:  
+        - &#39;arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole&#39;  
+      AssumeRolePolicyDocument:  
+        Version: 2012-10-17  
+        Statement:  
+          - Effect: Allow  
+            Principal:  
+              Service:  
+                - lambda.amazonaws.com  
+            Action:  
+              - &#39;sts:AssumeRole&#39;  
+      Policies:  
+        - PolicyName: MyProjectPolicy  
+          PolicyDocument:  
+            Version: 2012-10-17  
+            Statement:  
+              - Effect: Allow  
+                Action: secretsmanager:GetSecretValue  
+                Resource:  
+                  - Fn::Sub: &#39;arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:CAT-api-key&#39;  
+              - Effect: Allow  
+                Action: kms:Decrypt  
+                Resource:  
+                  - Fn::Sub: &#39;arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:CAT-api-key&#39;
+</code></pre><p>After created the template, run the AWS CLI command below. What it does is simply upload the zip file to the specified S3 bucket (myBucket in my example) and update <strong>CodeUri</strong> in your SAM template with the actual S3 URI path to the zip file. Then output a new template for you to use in the next step. You can open up the SAM template <strong>updated.yml</strong> to confirm. </p>
+<pre tabindex="0"><code>aws cloudformation package --template-file myfunction.yml --s3-bucket mybucket --output-template-file updated.yml
+</code></pre><p>The last step is to deploy the Lambda function from <strong>updated.yml</strong></p>
+<pre tabindex="0"><code>aws cloudformation deploy --stack-name myfunctionstack --template-file updated.yml --capabilities CAPABILITY\_AUTO\_EXPAND CAPABILITY\_NAMED\_IAM
+</code></pre><p>That&rsquo;s it folks! I know this isn&rsquo;t as straight forward in comparison to Python and Node.Js runtimes. But as I mentioned before, with a CICD system in place, you should be able to automate the whole deploy process fairly easily. Hope you find it useful!</p>
+]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/PowerShell" term="PowerShell" label="PowerShell" />
+                             
+                                <category scheme="/tags/AWS" term="AWS" label="AWS" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+        
+        <entry>
+            <title type="html"><![CDATA[Over the Wall - with help from Azure]]></title>
+            <link href="/2018/07/over-wall-with-help-from-azure.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2018/07/over-wall-with-help-from-azure.html</id>
+            
+            <published>2018-07-22T22:01:00-07:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>I had a long holiday in China recently. It had been a fun and eyes opening trip. Feels like the whole nation is in the middle of a “technology revolution”. Among all, Internet has become one of the core driving force. But while Wifi beomces a life essential here, the infamous Great Firewall (GFW) is also getting more effective. After tried numbers of paid and free VPN providers, I just could not find a reliable VPN service to simply let me post a picture on Facebook. I then decided it&rsquo;s time to bring the matter to my own hands. </p>
+<p>My VPN solution is pretty simple. It consist of a Squid proxy server and Azure P2S VPN. Access the Squid proxy server through its public IP alone will not help. The GFW will still be able to detect traffic destinations and block access successfully. A VPN tunnel ensure the traffic is encapsulated and prevents the GFW to block any traffic.</p>
+<p>It is worth mentioning that this solution does incur cost! Azure resources like VPN Gateway have ongoing cost. I, fortunately have access to a subscription with $200 credit. You can check the price details from <a class="gblog-markdown__link" href="https://azure.microsoft.com/en-gb/pricing/details/vpn-gateway/">here</a>.</p>
+<p><strong>Setup Squid Proxy</strong></p>
+<p>OK, lets get started! </p>
+<p>So first, we need to build a Squid Proxy server in Azure. Below is the PowerShell script I use to provision the VM. It creates an Ubuntu Linux VM within a vNet. All resources are provisioned inside &ldquo;tomlab-kr&rdquo; resource group, which is located in Korea South region. The script also creates a Security Group which allows only SSH and TCP 7777 traffic. The custom TCP port will be used for Squid proxy service. </p>
+<p># Create a resource group in KoreaSouth</p>
+<p>New-AzureRmResourceGroup  -Name  &ldquo;tomlab-kr&rdquo;  -Location  &ldquo;Korea South&rdquo;</p>
+<p># Create a subnet configuration</p>
+<p>$subnetConfig  =  New-AzureRmVirtualNetworkSubnetConfig  -Name  &ldquo;proxysubnet1&rdquo; `<br>
+-AddressPrefix  192.168.188.0/24</p>
+<p># Create a virtual network</p>
+<p>$vnet  =  New-AzureRmVirtualNetwork  -ResourceGroupName  &ldquo;tomlab-kr&rdquo; `<br>
+-Location  &ldquo;Korea South&rdquo;-Name  &ldquo;p2sVNET1&rdquo;  -AddressPrefix  192.168.0.0/16 `<br>
+-Subnet  $subnetConfig</p>
+<p># Create a public IP address and specify a DNS name</p>
+<p>$pip  =  New-AzureRmPublicIpAddress  -ResourceGroupName  &ldquo;tomlab-kr&rdquo; `<br>
+-Location  &ldquo;Korea South&rdquo;-AllocationMethod  Static  -IdleTimeoutInMinutes  4 `</p>
+<p>-Name  &ldquo;mypublicdns$(Get-Random)&rdquo;</p>
+<p># Create an inbound network security group rule for port 22</p>
+<p>$nsgRuleSSH  =  New-AzureRmNetworkSecurityRuleConfig  -Name  &ldquo;SGRuleSSH&rdquo; `<br>
+-Protocol  &ldquo;Tcp&rdquo;-Direction  &ldquo;Inbound&rdquo;  -Priority  1000  -SourceAddressPrefix  * `</p>
+<p>-SourcePortRange  *  -DestinationAddressPrefix  * -DestinationPortRange  22 `<br>
+-Access  &ldquo;Allow&rdquo;</p>
+<p># Create an inbound network security group rule for port 7777</p>
+<p>$nsgRuleWeb  =  New-AzureRmNetworkSecurityRuleConfig  -Name  &ldquo;SGRuleWeb&rdquo; `<br>
+-Protocol  &ldquo;Tcp&rdquo; -Direction  &ldquo;Inbound&rdquo;  -Priority  1001  -SourceAddressPrefix  * `</p>
+<p>-SourcePortRange  *  -DestinationAddressPrefix  * -DestinationPortRange  7777 `<br>
+-Access  &ldquo;Allow&rdquo;</p>
+<p># Create a network security group</p>
+<p>$nsg  =  New-AzureRmNetworkSecurityGroup  -ResourceGroupName  &ldquo;tomlab-kr&rdquo; `<br>
+-Location  &ldquo;Korea South&rdquo;-Name  &ldquo;LinuxSG&rdquo;  -SecurityRules  $nsgRuleSSH,$nsgRuleWeb</p>
+<p># Define the credential for the VM</p>
+<p>$cred  =  Get-Credential  -message  &ldquo;login for the new vm&rdquo;  -UserName  &ldquo;tom&rdquo; </p>
+<p># Create a virtual network card and associate with public IP address and NSG</p>
+<p>$nic  =  New-AzureRmNetworkInterface  -Name  &ldquo;proxyVMNic&rdquo; `<br>
+-ResourceGroupName  &ldquo;tomlab-kr&rdquo;-Location  &ldquo;Korea South&rdquo; `<br>
+-SubnetId  $vnet.Subnets[0].Id -PublicIpAddressId  $pip.Id `<br>
+-NetworkSecurityGroupId  $nsg.Id</p>
+<p># Create a virtual machine configuration</p>
+<p>$vmConfig  =  New-AzureRmVMConfig  -VMName  &ldquo;proxyvm1&rdquo;  -VMSize  &ldquo;Standard_DS1_v2&rdquo;  |  `</p>
+<p>Set-AzureRmVMOperatingSystem  -Linux  -ComputerName  &ldquo;proxyvm1&rdquo;  -Credential  $cred  |  `</p>
+<p>Set-AzureRmVMSourceImage  -PublisherName  &ldquo;Canonical&rdquo;  -Offer  &ldquo;UbuntuServer&rdquo; `<br>
+-Skus  &ldquo;16.04-LTS&rdquo;-Version  &ldquo;latest&rdquo;  |Add-AzureRmVMNetworkInterface  -Id  $nic.Id</p>
+<p># Create the VM</p>
+<p>New-AzureRmVM  -ResourceGroupName  &ldquo;tomlab-kr&rdquo;  -Location  &ldquo;Korea South&rdquo;  -VM  $vmConfig</p>
+<p>Once the VM is provisioned, the next step is to install and configure Squid on the Linux VM. </p>
+<p>The installation of Squid proxy server is pretty straight forward on a Ubuntu server. We simply run the command the below.</p>
+<p># sudo apt-get install squid</p>
+<p>To configure Squid proxy, we need to modify the squid configuration file. </p>
+<p>First, we make a backup copy of the configuration file, so in case we mess up, there is a clean copy to roll back to.</p>
+<p># cp /etc/squid/squid.conf /etc/squid/squid.conf.bkcopy</p>
+<p>Next, use your favorite text editor to modify the configuration file</p>
+<p># sudo nano /etc/squid/squid.conf</p>
+<p>Based on my tests, the default squid port 3128 is blocked by GFW. So the first thing to change is the default Squid port. In my case I changed it to 7777. </p>
+<p>http_port 7777</p>
+<p>Enable HTTP proxy access to all IPs.</p>
+<p>http_access allow all</p>
+<p>Add ACL to allow VPN and local VM subnet IPs. Those lines should be added in two different sections in the configuration file. Please refer to the squid configuration guidance for details line locations.</p>
+<p><strong>vpnsubnet</strong> refers to the VPN Client Subnet, proxysubnet refers to the subnet where the Squid proxy server lives.</p>
+<p>acl vpnsubnet 172.180.10.0/24</p>
+<p>acl proxysubnet 192.168.188.0/24</p>
+<p>http_access allow proxysubnet</p>
+<p>http_access allow vpnsubnet</p>
+<p>Now save the configuration file and restart squid service </p>
+<p># sudo systemctl restart squid</p>
+<p>You can test the proxy by creating another VM in the same proxyvmsubnet. </p>
+<p><strong>Setup P2SVPN</strong></p>
+<p>The steps to setup Azure Point-to-Site VPN is quite straight forward through Azure portal. Again, I will show you how this can be achieved through PowerShell script.</p>
+<p>First, we need to create a Gateway Subnet within the vNet we created for the Squid proxy. The PowerShell script below simply created a subnet named &ldquo;GatewaySubnet&rdquo;. This is a reserved name for the &ldquo;Gateway Subnet&rdquo;.</p>
+<p>$vNet  =  Get-AzureRmVirtualNetwork  -ResourceGroupName  &ldquo;tomlab-kr&rdquo;  -Name  &ldquo;p2sVNET1&rdquo;</p>
+<p>Add-AzureRmVirtualNetworkSubnetConfig  -VirtualNetwork  $vNet  -Name  &ldquo;GatewaySubnet&rdquo; `<br>
+-AddressPrefix  &ldquo;192.168.200.0/24&rdquo;</p>
+<p>Set-AzureRmVirtualNetwork  -VirtualNetwork  $vNet</p>
+<p>Then we just need to provision a VPN Gateway within the subnet. </p>
+<p>Note: The last command &ldquo;New-AzureRmVirtualNetworkGateway&rdquo; may fail with unexpected errors. This is likely due to the Gateway Subnet actually takes a few hours to be properly configured in Azure. The solution is simply to try the command again after a few hours&hellip; </p>
+<p># Get gatewaysubnet</p>
+<p>$subnet  =  Get-AzureRmVirtualNetworkSubnetConfig  -Name  &ldquo;GatewaySubnet&rdquo;  -VirtualNetwork  $vNet</p>
+<p>$pip  =  New-AzureRmPublicIpAddress  -Name  &ldquo;gwpip1&rdquo;  -ResourceGroupName  &ldquo;tomlab-kr&rdquo; `<br>
+-Location  &ldquo;korea south&rdquo;  -AllocationMethod  Dynamic</p>
+<p>$ipconf  =  New-AzureRmVirtualNetworkGatewayIpConfig  -Name  &ldquo;p2sgwIPconf&rdquo;  -Subnet  $subnet `<br>
+-PublicIpAddress  $pip</p>
+<p># Create VPN Gateway, remeber to wait for sunbnet ID to be generated<br>
+# (may take a few hours, use $subnet.id to check)</p>
+<p>New-AzureRmVirtualNetworkGateway  -Name  &ldquo;p2sgw&rdquo;  -ResourceGroupName  &ldquo;tomlab-kr&rdquo; `<br>
+-Location  &ldquo;korea south&rdquo;  -IpConfigurations  $ipconf  -GatewayType  VPN `<br>
+-VpnType  RouteBased  -GatewaySku  VpnGw1</p>
+<p>After provision the VPN Gateway, the next step is to configure the <strong>Client Address Space.</strong> This is the IP range reserved for VPN clients. You may notice this is the IP range we defined in the Squid proxy configuration file.</p>
+<p># configure the client address space with the VPN gateway</p>
+<p>$Gateway  =  Get-AzureRmVirtualNetworkGateway  -ResourceGroupName  $RG  -Name  $GWName</p>
+<p>Set-AzureRmVirtualNetworkGateway  -VirtualNetworkGateway  $Gateway `<br>
+-VpnClientAddressPool  &ldquo;172.180.10.0/24&rdquo;</p>
+<p>Next, we need to generate a pair of Root and Client certificates for the VPN Gateway authentication. </p>
+<p># Generate New Self Singed Certificate</p>
+<p>$cert  =  New-SelfSignedCertificate  -Type  Custom  -KeySpec  Signature  `</p>
+<p>-Subject  &ldquo;CN=P2SRootCert&rdquo;  -KeyExportPolicy  Exportable  `</p>
+<p>-HashAlgorithm  sha256  -KeyLength  2048  `</p>
+<p>-CertStoreLocation  &ldquo;Cert:CurrentUserMy&rdquo;  -KeyUsageProperty  Sign  -KeyUsage  CertSign</p>
+<p># Generate Client CCertificate</p>
+<p>New-SelfSignedCertificate  -Type  Custom  -DnsName  P2SChildCert  -KeySpec  Signature  `</p>
+<p>-Subject  &ldquo;CN=P2SChildCert&rdquo;  -KeyExportPolicy  Exportable  `</p>
+<p>-HashAlgorithm  sha256  -KeyLength  2048  `</p>
+<p>-CertStoreLocation  &ldquo;Cert:CurrentUserMy&rdquo;  `</p>
+<p>-Signer  $cert  -TextExtension  @(&ldquo;2.5.29.37={text}1.3.6.1.5.5.7.3.2&rdquo;)</p>
+<p>The script generates both the Root and Client certificates under CurrentUserMy folder inside your certificate repo. </p>
+<p>Export the Root and Client certificates. The Root certificate needs to be exported without password as a <strong>Base-64 encoded X.509 cer</strong> file. The Client certificate needs to be exported with password in <strong>PKCS #12 (.pfx)</strong> format.</p>
+<p>Run the PowerShell commands below to configure the VPN gateway with the Root certificate </p>
+<p># configure VPN Gateway with the root certificate</p>
+<p>$P2SRootCertName  =  &ldquo;P2SRootCert.cer&rdquo;</p>
+<p>$filePathForCert  =  &ldquo;C:Downloads ootcert2.cer&rdquo;</p>
+<p>$cert  =  new-object  System.Security.Cryptography.X509Certificates.X509Certificate2($filePathForCert)</p>
+<p>$CertBase64_3  =  [system.convert]::ToBase64String($cert.RawData)</p>
+<p>$p2srootcert  =  New-AzureRmVpnClientRootCertificate  -Name  $P2SRootCertName  -PublicCertData  $CertBase64_3</p>
+<p># upload the public key information to Azure</p>
+<p>Add-AzureRmVpnClientRootCertificate  -VpnClientRootCertificateName  $P2SRootCertName  `</p>
+<p>-VirtualNetworkGatewayName  &ldquo;p2sgw&rdquo;  -ResourceGroupName  &ldquo;tomlab-kr&rdquo;  `</p>
+<p>-PublicCertData  $CertBase64_3</p>
+<p>The solution is now ready for testing.</p>
+<p><strong>Connect from PC</strong></p>
+<p>Setup P2S VPN client on PC is pretty easy. After download the VPN Client from Azure Portal, simply follow the prompts to install the client.</p>
+<p>You may get a security warning from Windows 10. This can be simply ignored as you know this is a trusted app from Microsoft. Though it may look like the only option here is &ldquo;<strong>Don&rsquo;t run</strong>&rdquo;<strong>,</strong> as soon as you click <strong>More Info,</strong> you will be given the option to bypass the prompt.</p>
+<p><a class="gblog-markdown__link--raw" href="https://4.bp.blogspot.com/-JrIGsAVrrJY/W1Veno2vCAI/AAAAAAAAKHI/0a1WiXKLGGsSKjkKVmkjJB0Ox7lMOPdWQCLcBGAs/s1600/protectWarn1.png"><img src="https://4.bp.blogspot.com/-JrIGsAVrrJY/W1Veno2vCAI/AAAAAAAAKHI/0a1WiXKLGGsSKjkKVmkjJB0Ox7lMOPdWQCLcBGAs/s320/protectWarn1.png" alt=""  /></a></p>
+<p><a class="gblog-markdown__link--raw" href="https://1.bp.blogspot.com/-JCCZjkaJ0ps/W1Ve3HRoZ5I/AAAAAAAAKHM/VxJ6BgxW8hc86hPWHG7rs2sOf_-3x1nVACLcBGAs/s1600/protectwarn2.png"><img src="https://1.bp.blogspot.com/-JCCZjkaJ0ps/W1Ve3HRoZ5I/AAAAAAAAKHM/VxJ6BgxW8hc86hPWHG7rs2sOf_-3x1nVACLcBGAs/s320/protectwarn2.png" alt=""  /></a></p>
+<p>Once the client is installed, don&rsquo;t forget to change PC&rsquo;s proxy to the private IP of the Squid proxy server.</p>
+<p><strong>Connect from iPhone</strong></p>
+<p>By now you probably already jumped on Facebook posted 10 pictures and read 20 Emails from your Gmail inbox. But transferring photos from your phone to PC is still bit painful. You still miss the joy of sending those nice posts with a few clicks from your phone. OK, let&rsquo;s make that happen.</p>
+<p>Unlike PC, there is no app to be installed on iOS. Instead, we need to install the client certificate we created for the VPN connection onto our iPhone. </p>
+<p>First, upload the .pfx file to OneDrive (get one, it&rsquo;s free and can be accessed in China). </p>
+<p>Next, install and open OneDrive app from your phone. Select the pfx file and choose Share. You should now see the &ldquo;Copy Link&rdquo; option. Click it to copy the link.</p>
+<p>Open the URL with Safari (Not Chrome) from your phone. Safari will recognize it is a certificate and ask you if allow it to be installed. Click Allow to proceed. </p>
+<p><a class="gblog-markdown__link--raw" href="https://3.bp.blogspot.com/-EcQJLjgAtls/W1Vfum4X2ZI/AAAAAAAAKHY/S0M6GEurlfgFu5kvvKkZjCipltbUwl_rACLcBGAs/s1600/allowopen.png"><img src="https://3.bp.blogspot.com/-EcQJLjgAtls/W1Vfum4X2ZI/AAAAAAAAKHY/S0M6GEurlfgFu5kvvKkZjCipltbUwl_rACLcBGAs/s320/allowopen.png" alt=""  /></a></p>
+<p>Follow the prompts to install.</p>
+<p><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link--raw" href="https://4.bp.blogspot.com/-bLSHMr58DFA/W1Vf6meBBEI/AAAAAAAAKHc/Nf10nNDnJYA28iQofaI_BC78oFr5hXp4ACLcBGAs/s1600/installprofile.png"><img src="https://4.bp.blogspot.com/-bLSHMr58DFA/W1Vf6meBBEI/AAAAAAAAKHc/Nf10nNDnJYA28iQofaI_BC78oFr5hXp4ACLcBGAs/s320/installprofile.png" alt=""  /></a></p>
+<p><a class="gblog-markdown__link--raw" href="https://4.bp.blogspot.com/-roDmZm1ICUo/W1VgaQ6dPLI/AAAAAAAAKHw/nG_IhXa2dEE2Y_2sZD0YfMaJOxTawM35QCEwYBhgL/s1600/pass.png"><img src="https://4.bp.blogspot.com/-roDmZm1ICUo/W1VgaQ6dPLI/AAAAAAAAKHw/nG_IhXa2dEE2Y_2sZD0YfMaJOxTawM35QCEwYBhgL/s320/pass.png" alt=""  /></a></p>
+<p>After install the certificate, next step is to add a VPN configuration. </p>
+<p>The Server and Remote ID can be obtained from the XML file <strong>vpnSettings.xml</strong>downloaded alone with the VPN Client.</p>
+<p><a class="gblog-markdown__link--raw" href="https://3.bp.blogspot.com/-QIVWMkxonSQ/W1Vg7YzxONI/AAAAAAAAKH8/NOXE9z8eV3wgx_D0rhppLqE_vcOoOjYXwCLcBGAs/s1600/vpnconfig.png"><img src="https://3.bp.blogspot.com/-QIVWMkxonSQ/W1Vg7YzxONI/AAAAAAAAKH8/NOXE9z8eV3wgx_D0rhppLqE_vcOoOjYXwCLcBGAs/s320/vpnconfig.png" alt=""  /></a></p>
+<p>The Proxy settings within the VPN configuration somehow does not work. The only way is to add Proxy setting to local WiFi connection. </p>
+<p><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link" href="https://www.blogger.com/blogger.g?blogID=3427010633633716171"></a><a class="gblog-markdown__link--raw" href="https://4.bp.blogspot.com/-cFOie6qWtJs/W1VhF9p7sHI/AAAAAAAAKIA/1DdLANwEnPQC53NhiQq3KkJRopAAGoY0wCLcBGAs/s1600/wifiproxy.png"><img src="https://4.bp.blogspot.com/-cFOie6qWtJs/W1VhF9p7sHI/AAAAAAAAKIA/1DdLANwEnPQC53NhiQq3KkJRopAAGoY0wCLcBGAs/s320/wifiproxy.png" alt=""  /></a></p>
+<p>After completed all these settings, fire up the VPN connection from your phone and you should now be able to access Facebook, Google, Instagram!</p>
+]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/PowerShell" term="PowerShell" label="PowerShell" />
+                             
+                                <category scheme="/tags/VPN" term="VPN" label="VPN" />
+                             
+                                <category scheme="/tags/Azure" term="Azure" label="Azure" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+</feed>

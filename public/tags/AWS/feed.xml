@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <generator uri="https://gohugo.io/" version="0.97.3">Hugo</generator><title type="html"><![CDATA[AWS on Tom Tech Blog]]></title>
+    
+        <subtitle type="html"><![CDATA[Share and Learn]]></subtitle>
+    
+    
+    
+            <link href="/tags/AWS/" rel="alternate" type="text/html" title="HTML" />
+            <link href="/tags/AWS/feed.xml" rel="self" type="application/atom+xml" title="Atom" />
+    <updated>2022-09-17T10:49:41+10:00</updated>
+    
+    <id>/tags/AWS/</id>
+        
+        <entry>
+            <title type="html"><![CDATA[Package and deploy a PowerShell Lambda function with custom modules]]></title>
+            <link href="/2020/06/package-and-deploy-powershell-lambda.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2020/06/package-and-deploy-powershell-lambda.html</id>
+            
+            <published>2020-06-06T05:20:00-07:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>Recently I had the need to create a Lambda function with PowerShell 7. The function is to synchronize data between two REST APIs. It&rsquo;s fairly simple, but does need to use a custom made module. I spent quite bit time to find out how to deploy PowerShell Lambdas with custom modules. Thought might write a guide to help people want to do the same.   </p>
+<p>My script is fairly simple, it gets a list of users from one API and then convert it to a XML format object and export into the target API. To reuse some of the code, The script requires AWS.Tools module as well as a custom made module, let&rsquo;s call it CAT. The CAT is a module contains some functions that are invoked by the main script. The inital lines of my main script look like below:</p>
+<pre tabindex="0"><code>#Requires -Modules @{ModuleName=&#39;AWS.Tools.Common&#39;;ModuleVersion=&#39;4.0.5.0&#39;}  
+#Requires -Modules @{ModuleName=&#39;AWS.Tools.SecretsManager&#39;;ModuleVersion=&#39;4.0.5.0&#39;}  
+#Requires -Modules CAT 
+</code></pre><p>In addition to install the <strong>AWS.Tools</strong> modules, I manually copied my CAT module folder to the <strong>$Env:PSModulePath</strong>.</p>
+<p>The nex thing is to package the code into a zip file along with all required modules. To do so, install <strong>AWSLambdaPSCore</strong> module and run this PowerShell command:</p>
+<pre tabindex="0"><code>New-AWSPowerShellLambdaPackage -ScriptPath &#34;../functions/FunctionName.ps1&#34; -outputPackage &#34;FunctionName.zip&#34;
+</code></pre><p>You should see the script and modules are all packaged as shown below.</p>
+<pre tabindex="0"><code>Staging deployment at C:\\Users\\tom\\AppData\\Local\\Temp\\myfunction  
+Configuring PowerShell to version 7.0.0  
+Generating C# project C:\\Users\\tom\\AppData\\Local\\Temp\\myfunction\\myfunction.csproj used to create Lambda function bundle.  
+Generating C:\\Users\\tom\\AppData\\Local\\Temp\\myfunction\\Bootstrap.cs to load PowerShell script and required modules in Lambda environment.  
+Generating aws-lambda-tools-defaults.json config file with default values used when publishing project.  
+Copying PowerShell script to staging directory  
+Copying local module AWS.Tools.Common(4.0.5.0) from C:\\Users\\tom\\OneDrive\\Documents\\PowerShell\\Modules\\AWS.Tools.Common\\4.0.5.0  
+Copying local module AWS.Tools.SecretsManager(4.0.5.0) from C:\\Users\\tom\\OneDrive\\Documents\\PowerShell\\Modules\\AWS.Tools.SecretsManager\\4.0.5.0  
+Copying local module CAT(0.0.2) from C:\\program files\\powershell\\7\\Modules\\CAT  
+Resolved full output package path as C:\\Users\\tom\\Dropbox\\github\\myproject\\deploy\\myfunction.zip  
+Creating deployment package at C:\\Users\\tom\\Dropbox\\github\\myproject\\deploy\\myfunction.zip  
+Restoring .NET Lambda deployment tool  
+Initiate packaging  
+When deploying this package to AWS Lambda you will need to specify the function handler. The handler for this package is: myfunction::myfunction.Bootstrap::ExecuteFunction. To request Lambda to invoke a specific PowerShell function in your script specify the name of the PowerShell function in the environment variable AWS\_POWERSHELL\_FUNCTION\_HANDLER when publishing the package.  
+LambdaHandler                                         PathToPackage                                                         PowerShellFunctionHandlerEnvVar  
+\-------------                                         -------------                                                         -------------------------------  
+myfunction::myfunction.Bootstrap::ExecuteFunction C:\\Users\\tom\\Dropbox\\github\\myproject\\deploy\\myfunction.zip AWS\_POWERSHELL\_FUNCTION\_HANDLER
+</code></pre><p>The steps below are not required if you have a CICD pipeline built up like me. As soon as I push my updated code and package to GitHub, the pipeline will automatically upload the package and deploy it. But if don&rsquo;t, read on! </p>
+<p>The next step is to create a S3 bucket to host your package. You can skip this step if you already have a designated bucket for such purpose.</p>
+<p>After created the bucket, we will then create a <strong>SAM template</strong>. SAM template is basically a transformed CloudFormation template. It allows us to add all the neccessary bits like Events and DeadLetterQueue under AWS::Serverless::Function resource. Here&rsquo;s a simple example. Pay close attention to <strong>CodeUri</strong>. Notice it&rsquo;s pointing to the local zip file instead of a S3 URL? This is by purpose. I will explain in next step.</p>
+<pre tabindex="0"><code>AWSTemplateFormatVersion: &#39;2010-09-09&#39;  
+Transform: &#39;AWS::Serverless-2016-10-31&#39;  
+Resources:  
+  PopCycler:  
+    Type: &#39;AWS::Serverless::Function&#39;  
+    Properties:  
+      Handler: myfunction::myfunction.Bootstrap::ExecuteFunction  
+      Runtime: dotnetcore3.1  
+      **CodeUri: &#39;./myfunction.zip&#39;**  
+      Role:  
+        Fn::GetAtt:  
+        - LambdaRole  
+        - Arn  
+      Environment:  
+        Variables:  
+          ENV: dev  
+          CATURL: https://dev.CAT.com  
+          CATAPPID: Abc12345  
+          CATSECRETID: CAT-api-key  
+          VENDORSECRETID: myproject  
+      Events:  
+        ScanInterval:  
+          Type: Schedule  
+          Properties:  
+            Schedule: &#39;rate(1 day)&#39;  
+      Timeout: 300  
+      MemorySize: 256  
+      Tags:  
+        owner: tom  
+  LambdaRole:  
+    Type: &#39;AWS::IAM::Role&#39;  
+    Properties:  
+      RoleName: myproject-lambdarole  
+      Tags:  
+        -   
+          Key: &#39;owner&#39;  
+          Value: &#39;myteam&#39;  
+      ManagedPolicyArns:  
+        - &#39;arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole&#39;  
+      AssumeRolePolicyDocument:  
+        Version: 2012-10-17  
+        Statement:  
+          - Effect: Allow  
+            Principal:  
+              Service:  
+                - lambda.amazonaws.com  
+            Action:  
+              - &#39;sts:AssumeRole&#39;  
+      Policies:  
+        - PolicyName: MyProjectPolicy  
+          PolicyDocument:  
+            Version: 2012-10-17  
+            Statement:  
+              - Effect: Allow  
+                Action: secretsmanager:GetSecretValue  
+                Resource:  
+                  - Fn::Sub: &#39;arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:CAT-api-key&#39;  
+              - Effect: Allow  
+                Action: kms:Decrypt  
+                Resource:  
+                  - Fn::Sub: &#39;arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:CAT-api-key&#39;
+</code></pre><p>After created the template, run the AWS CLI command below. What it does is simply upload the zip file to the specified S3 bucket (myBucket in my example) and update <strong>CodeUri</strong> in your SAM template with the actual S3 URI path to the zip file. Then output a new template for you to use in the next step. You can open up the SAM template <strong>updated.yml</strong> to confirm. </p>
+<pre tabindex="0"><code>aws cloudformation package --template-file myfunction.yml --s3-bucket mybucket --output-template-file updated.yml
+</code></pre><p>The last step is to deploy the Lambda function from <strong>updated.yml</strong></p>
+<pre tabindex="0"><code>aws cloudformation deploy --stack-name myfunctionstack --template-file updated.yml --capabilities CAPABILITY\_AUTO\_EXPAND CAPABILITY\_NAMED\_IAM
+</code></pre><p>That&rsquo;s it folks! I know this isn&rsquo;t as straight forward in comparison to Python and Node.Js runtimes. But as I mentioned before, with a CICD system in place, you should be able to automate the whole deploy process fairly easily. Hope you find it useful!</p>
+]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/PowerShell" term="PowerShell" label="PowerShell" />
+                             
+                                <category scheme="/tags/AWS" term="AWS" label="AWS" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+</feed>

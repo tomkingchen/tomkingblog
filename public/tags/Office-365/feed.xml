@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <generator uri="https://gohugo.io/" version="0.97.3">Hugo</generator><title type="html"><![CDATA[Office 365 on Tom Tech Blog]]></title>
+    
+        <subtitle type="html"><![CDATA[Share and Learn]]></subtitle>
+    
+    
+    
+            <link href="/tags/Office-365/" rel="alternate" type="text/html" title="HTML" />
+            <link href="/tags/Office-365/feed.xml" rel="self" type="application/atom+xml" title="Atom" />
+    <updated>2022-09-17T10:49:41+10:00</updated>
+    
+    <id>/tags/Office-365/</id>
+        
+        <entry>
+            <title type="html"><![CDATA[Monitor Office 365 Outages with Twitter]]></title>
+            <link href="/2018/07/monitor-office-365-outages-with-twitter.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2018/07/monitor-office-365-outages-with-twitter.html</id>
+            
+            <published>2018-07-28T05:29:00-07:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>Office 365 has high SLAs (<a class="gblog-markdown__link" href="http://www.microsoftvolumelicensing.com/Downloader.aspx?DocumentId=14033">the latest English version</a>) backed by Microsoft’s excellent Azure Cloud. However, like every other cloud services, there is always the chance for something unexpected to happen.</p>
+<p>This year April Office 365 had a major hiccup to its service. Its Asia Pacific backend Azure AD authentication went haywire. As a result, users lost access all O365 services. To make it worse, the usual Office 365 monitoring channel: Office 365 dashboard was not accessible due to this fault.</p>
+<p>To track the issue at the time, I ended up relying on the official MS Twitter account @Office365Status for updates. The account contains all Office 365 service outage notifications. This made it become the only source for people to track the issue at that time.</p>
+<p>After the incident, it become obvious that the Twitter account is a pretty reliable source for monitoring Office 365 service status. Based on this, I developed a solution, it uses PowerShell script to check for new tweets from @Office365Status Twitter account. The scheduled script is executed from a AWS EC2 instance, this completely eliminates the dependence from Microsoft services.</p>
+<p>Ok, let’s go through the script in details.</p>
+<p>In order to allow our script to read tweets, we first need to create an app in <a class="gblog-markdown__link" href="https://apps.twitter.com">https://apps.twitter.com</a>. Please be aware the site will be consolidated into <a class="gblog-markdown__link" href="https://developer.twitter.com">https://developer.twitter.com</a> soon. And as of July 2018, you will need to apply for a Twitter developer account in order to create a new app.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-HMX0MrR4vyM/W1xhl1-KbaI/AAAAAAAAKIo/eYtJlzwhwRMcu855dDSodhxWdzq-4ytegCHMYCw/s1600-h/image%255B3%255D"><img src="https://lh3.googleusercontent.com/-uoIQj0dqUBQ/W1xhnQuSt9I/AAAAAAAAKIs/GdlEnFR79P4jYnGYlmyZ_mFeWNFSwsPAwCHMYCw/image_thumb%255B1%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>After created the app, under Permissions, set the permission as Read only, AS the monitoring script will have no need to write.</p>
+<p><a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-7qbo8_iMsy0/W1xlp8_roII/AAAAAAAAKJI/0yxQF2JvjvYvF8z8yrzi_l3eu6LZK26_wCHMYCw/s1600-h/image%255B6%255D"><img src="https://lh3.googleusercontent.com/-D-DA5sebsmg/W1xlqxc3-7I/AAAAAAAAKJM/TQYiMVT2NvsXHY22zGPMNA2Bbs1H_qyywCHMYCw/image_thumb%255B2%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>Under Keys and Access Tokens, copy following key values to notepad. These values will be needed in the script to configure the access to Twitter.</p>
+<ul>
+<li>Consumer Key (API Key)</li>
+<li>Consumer Secret (API Secret)</li>
+<li>Access Token</li>
+<li>Access Token Secret</li>
+</ul>
+<p>Now we just need a PowerShell module that uses Twitter API to pull out tweets. Among all the PowerShell modules I tested, MyTwitter, written by Adam Bertram is the only one works for me. You can find the module from <a class="gblog-markdown__link" href="https://gallery.technet.microsoft.com/scriptcenter/Tweet-and-send-Twitter-DMs-8c2d6f0a">here</a>.</p>
+<p>First, we create a authenticated session with the generated app tokens.</p>
+<pre tabindex="0"><code>New-MyTwitterConfiguration \-APIKey YourTwitterAppAPIKey \`  
+\-APISecret YourTwitterAppAPISecret \`  
+\-AccessToken YourTwitterAppAccessToken \`  
+\-AccessTokenSecret YourTwitterAppAccessTokenSecret  
+</code></pre><p>Next, we use Get-TweetTimeline to get recent tweets from @Office365Status account. Then we grab the first item from the array, which is the latest tweet from the account.</p>
+<pre tabindex="0"><code>$TimeLine \= Get-TweetTimeline \-UserName &#34;office365status&#34; \-MaximumTweets 100   
+$tweet \= $TimeLine\[0\]   
+</code></pre><p>The script will then get the creation time of the latest tweet. Twitter uses a non standard time format. So first, we will need to convert the time to a conventional format. This will allow us to compare the creation time with the current time on the server.</p>
+<p>Twitter original creation time format:</p>
+<p> <a class="gblog-markdown__link--raw" href="https://lh3.googleusercontent.com/-d5C9qmNRzeY/W12X39ttQtI/AAAAAAAAKKM/66PB9LDr3A0ed0taIexstfyI0yewAhsjgCHMYCw/s1600-h/image%255B11%255D"><img src="https://lh3.googleusercontent.com/-ZDQBtBveKF0/W12X5ehaIuI/AAAAAAAAKKQ/OXF6CGtomH8e4gl3gVo4juRrbQ1TG9d2gCHMYCw/image_thumb%255B5%255D?imgmax=800" alt="image"  title="image" /></a></p>
+<p>To convert the time we use a Convert-DateString function.</p>
+<pre tabindex="0"><code>$createTime \= Convert-DateString \-Date $tweet.created\_at \`
+</code></pre><p>-Format &lsquo;ddd MMM dd HH:mm:ss zzzz yyyy&rsquo;</p>
+<pre tabindex="0"><code>
+ddd = First 3 letter of weekday.
+
+MMM = First 3 letter of month.
+
+dd = day of the month
+
+HH:mm:ss = hours:minutes:seconds
+
+zzzz = time zone hours
+
+yyyy = year
+
+The function uses .Net method TryParseExact to convert the time format to something like below.
+
+[![image](https://lh3.googleusercontent.com/-ijXZuR9Re_c/W12X7tgzLiI/AAAAAAAAKKY/EdOmprvEeQYekzQu7MI9aZTwT4pB5HhDACHMYCw/image_thumb%255B6%255D?imgmax=800 &#34;image&#34;)](https://lh3.googleusercontent.com/-12vIAsjFFQU/W12X6kad5eI/AAAAAAAAKKU/-GNbRmhKcTwrBma5Q4hpDLd3jBJpTfNkACHMYCw/s1600-h/image%255B14%255D)
+</code></pre><p>function Convert-DateString ([String]$Date, [String[]]$Format)<br>
+{<br>
+$result = New-Object DateTime</p>
+<p>$convertible = [DateTime]::TryParseExact(<br>
+$Date,<br>
+$Format,<br>
+[System.Globalization.CultureInfo]::InvariantCulture,<br>
+[System.Globalization.DateTimeStyles]::None,<br>
+[ref]$result)</p>
+<p>if ($convertible) { $result }<br>
+}</p>
+<pre tabindex="0"><code>
+Once we have the correct creation time, my script will check if the tweet is a reply. This is to filter out those reply tweets. As we only care about the incident updates.
+
+The script will then check if the tweet is created within last hour. Depends on the interval you schedule the script. You may set this to the frequent you desire. In my case, I schedule the script to check every hour, hence the 1 hour interval.
+
+Upon confirm the tweet is posted within last hour and is not a reply tweet, the script will then send out an email to a monitoring mailbox (Not your Office 365 mailbox of course!).
+</code></pre><p>if ($tweet.in_reply_to_user_id_str -like &ldquo;&rdquo;){<br>
+# If the tweet is created within last hour, send out alert<br>
+if ($createTime -gt (get-date).Addhours(-1)){</p>
+<pre><code>    $body \= $tweet.text  
+    $Emailsubject \= &quot;Microsoft Office365Status Twitter Account just post a new update&quot;  
+    Send-MailMessage \-from &quot;tom.chen@contoso.com&quot; \-To &quot;it@contoso.com&quot; \-SmtpServer mailserver.contoso.com \-Subject $Emailsubject \-Body $body  
+}else{  
+    return  
+}  
+</code></pre>
+<p>}</p>
+<pre tabindex="0"><code>
+The PowerShell monitoring script can be downloaded from my GitHub repo [here](https://github.com/tomkingchen/PowershellScripts/blob/master/MonitorO365Status_pub.ps1).
+
+The last part of the solution is to upload the script to a server (EC2 in AWS in my case) and schedule it to run every hour!
+
+Below is an Email I received for a recent incident. Hope you find this useful!
+
+[![image](https://lh3.googleusercontent.com/-Qa6eKiG_uMw/W12X-Og0L2I/AAAAAAAAKKg/fGzwcS_QbEo4zhtzcKhKZteFUv3U-OYRgCHMYCw/image_thumb%255B7%255D?imgmax=800 &#34;image&#34;)](https://lh3.googleusercontent.com/-11H9StkvGaA/W12X84cg3ZI/AAAAAAAAKKc/GGfUZ6VM63kOJXtMy5jtMQO16Nzl4IIuwCHMYCw/s1600-h/image%255B17%255D)
+</code></pre>]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/Office-365" term="Office-365" label="Office 365" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+        
+        <entry>
+            <title type="html"><![CDATA[On Premise Mailbox user missing in Exchange Online GAL]]></title>
+            <link href="/2015/11/on-premise-mailbox-user-does-not-show.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2015/11/on-premise-mailbox-user-does-not-show.html</id>
+            
+            <published>2015-11-01T20:12:00-08:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>Ran into an interesting issue with one of our Exchange Online customer. Thought it probably worth sharing with the solution I found.</p>
+<p>The customer has an Exchange Hybrid setup. Recently some of  Office 365 Exchange Online users complain they cannot email to a particular on premise mailbox: <a class="gblog-markdown__link" href="mailto:Paul.Smith@contoso.com">Paul.Smith@contoso.com</a>. The user bascialy does not show up in Exchange Online GAL. The on premise mailbox is working fine and other on premise staff can send emails to it without issue. When I checked Exchange Online, I cannot find the contact object for this account.</p>
+<p>Initially I thought it could be for some reason the user&rsquo;s on premise AD object has not been synced properly to Office 365. So I tried with recreating the object in Office 365 by moving the on premise AD account to a non-synced OU. This delete the user&rsquo;s Office 365 account. Then I move the on premise account back into its original OU. After re-sync the account back into Office 365, it still refuse to show up in Exchange Online contact list.</p>
+<p>As always, I contacted Microsoft support to try get an answer. But that didn&rsquo;t prove to be too useful either. The suggestion MS provided is to &ldquo;Change our Email domain <strong>contoso.com</strong> from Authority to Internal Relay&rdquo;. This issue only affects a single user out of 500 and MS is suggesting to change a Global setting. I give them up quickly and focus on research the issue myself.</p>
+<p>I then took a close look at the user&rsquo;s Office 365 account, while compare it with other accounts I notice a difference in the field of <strong>CloudExchangeRecipientDisplayType</strong>. </p>
+<p>Get-MSOLUser –UserPrincipalName <em>paul.smith@contoso.com</em> | fl &gt; c:\paul.txt</p>
+<p>Get-MSOLUser –UserPrincipalName <em>tom.leigh@contoso.com</em> | fl &gt; c:\tom.txt</p>
+<p><strong>Paul&rsquo;s user details</strong></p>
+<p><img src="file:///C:/Users/chent/AppData/Local/Temp/enhtmlclip/Image%2821%29.png" alt=""  /></p>
+<p><a class="gblog-markdown__link--raw" href="http://3.bp.blogspot.com/-N2nK4e3yCJY/VjLAxmgWt7I/AAAAAAAAJKg/8HdHpZ62UUo/s1600/pauldetail.png"><img src="http://3.bp.blogspot.com/-N2nK4e3yCJY/VjLAxmgWt7I/AAAAAAAAJKg/8HdHpZ62UUo/s320/pauldetail.png" alt=""  /></a></p>
+<p><strong>Another user details</strong></p>
+<p><a class="gblog-markdown__link--raw" href="http://1.bp.blogspot.com/-YeM7H3u7D3I/VjLBDL5g_HI/AAAAAAAAJKo/V_sT-LIQQW0/s1600/userdetail.png"><img src="http://1.bp.blogspot.com/-YeM7H3u7D3I/VjLBDL5g_HI/AAAAAAAAJKo/V_sT-LIQQW0/s320/userdetail.png" alt=""  /></a></p>
+<p><img src="file:///C:/Users/chent/AppData/Local/Temp/enhtmlclip/Image%2822%29.png" alt=""  /></p>
+<p>According to this <a class="gblog-markdown__link" href="http://blogs.technet.com/b/johnbai/archive/2013/09/11/o365-msexchangerecipienttypedetails.aspx">article</a>, -2147483642 means &ldquo;SynedMailboxUser&rdquo;. This is the recipient type of Paul&rsquo;s Office 365 account. So now we know what&rsquo;s wrong with Paul&rsquo;s account.</p>
+<p>To fix the issue, we just need to set <strong>CloudExchangeRecipientDisplayType</strong> with the correct value. To do so we need to make change to Paul&rsquo;s on premise AD account.</p>
+<p>In on premise ADUC, enable <strong>Advanced Features</strong> in view. Open the user properties and select <strong>Attribute Editor</strong> tab.</p>
+<p>Change following fields</p>
+<p><strong>msExchRecipietnDisplayType -&gt; 6</strong></p>
+<p><strong>msExchRecipientTypeDetails -&gt; 128</strong></p>
+<p><strong>targetAddress -&gt; <a class="gblog-markdown__link" href="mailto:paul.smith@contoso.com">paul.smith@contoso.com</a></strong></p>
+<p>Make sure you take a screenshot of the existing value</p>
+<p><img src="file:///C:/Users/chent/AppData/Local/Temp/enhtmlclip/Image%2823%29.png" alt=""  /></p>
+<p><img src="file:///C:/Users/chent/AppData/Local/Temp/enhtmlclip/Image%2824%29.png" alt=""  /></p>
+<p>After change the value, perform a AD SYNC from DirSync or run <strong>Start-OnlineCoexistenceSync</strong>. </p>
+<p>In the SYNC log, confirm the user object has been updated. If you go into the Exchange Online contact list, Paul&rsquo;s email address should be available now.</p>
+<p>Once confirmed user email address available in Office 365 again, we need to reverse the above change to the on premise user account. Otherwise, Paul will not be able to access his on premise mailbox.</p>
+<p>To do so, simply apply the following changes</p>
+<p><strong>msExchRecipietnDisplayType -&gt; 1073741824</strong></p>
+<p><strong>msExchRecipientTypeDetails -&gt; 1</strong></p>
+<p><strong>targetAddress -&gt; <not set></strong></p>
+]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/GAL" term="GAL" label="GAL" />
+                             
+                                <category scheme="/tags/Exchange-Hybrid" term="Exchange-Hybrid" label="Exchange Hybrid" />
+                             
+                                <category scheme="/tags/Office-365" term="Office-365" label="Office 365" />
+                             
+                                <category scheme="/tags/Cloud" term="Cloud" label="Cloud" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+        
+        <entry>
+            <title type="html"><![CDATA[Receive error: Target mailbox doesn't have an SMTP proxy matching '.mail.onmicrosoft.com' when move mailbox to Office 365]]></title>
+            <link href="/2014/04/office-365-exchange-hybrid-deployment.html?utm_source=atom_feed" rel="alternate" type="text/html"  hreflang="en" />
+            <id>/2014/04/office-365-exchange-hybrid-deployment.html</id>
+            
+            <published>2014-04-06T23:51:00-07:00</published>
+            <updated>2021-09-19T15:05:42+10:00</updated>
+            
+            
+            <content type="html"><![CDATA[<p>Recently I was working on Exchange Hybrid Deployment for one of our customer. The Hybrid Configuration process itself went smoothly. No errors for HCW. </p>
+<p>The problems came when I tried to move mailbox to Exchange Online. The migration fails with error:<br>
+<strong>Target mailbox doesn&rsquo;t have an SMTP proxy matching &lsquo;<domain>.mail.onmicrosoft.com&rsquo;&quot;</strong></p>
+<p>To check that I ran the following command against the On-premise Exchange.</p>
+<p>Get-Mailbox &ldquo;O365 Test5&rdquo; | fl and check the EmailAddress filed</p>
+<p><a class="gblog-markdown__link--raw" href="http://3.bp.blogspot.com/-xfnTdyJyULk/U0JKuLIyF0I/AAAAAAAAJCI/N_bl6fxO_0o/s1600/getmailbox.png"><img src="http://3.bp.blogspot.com/-xfnTdyJyULk/U0JKuLIyF0I/AAAAAAAAJCI/N_bl6fxO_0o/s1600/getmailbox.png" alt=""  /></a></p>
+<p>Then I ran get-mailuser in Exchange Online. Because the mailbox hasn&rsquo;t been migrated, the user still show up as Mailuser(Contact) in Office 365.</p>
+<p>Get-MailUser &ldquo;o365 test6&rdquo; |fl</p>
+<p><a class="gblog-markdown__link--raw" href="http://4.bp.blogspot.com/-uIrsas0ytfw/U0JINlFHZDI/AAAAAAAAJB0/mxOOdYZj5S4/s1600/getmailuser.png"><img src="http://4.bp.blogspot.com/-uIrsas0ytfw/U0JINlFHZDI/AAAAAAAAJB0/mxOOdYZj5S4/s1600/getmailuser.png" alt=""  /></a></p>
+<p>Noticed the proxy address &ldquo;contoso.mail.onmicrosoft.com&rdquo; does not show up into the Azure AD object. The user object in Office 365  only has our primary SMTP address &ldquo;<a class="gblog-markdown__link" href="mailto:username@contoso.com">username@contoso.com</a>&rdquo; and &ldquo;<a class="gblog-markdown__link" href="mailto:username@contoso.onmicrosoft.com">username@contoso.onmicrosoft.com</a>&rdquo; stamped. &ldquo;CONTOSO.MAIL.onmicrosoft.com&rdquo; is missing from the address list.</p>
+<p>After review the DirSync rules, I notice for user object, the proxyAddress attribute does not have an &ldquo;Import&rdquo; rule associated with it. As a test I manually added a Import rule for &ldquo;proxyAddresses&rdquo;.<br>
+The rule details are:</p>
+<p>cd.all:proxyAddresses-&gt;mv.all:proxyAddresses</p>
+<p><a class="gblog-markdown__link--raw" href="http://1.bp.blogspot.com/-sV_2gnEWJ54/UzpSrP0C_LI/AAAAAAAAJBU/JshPC8DHPjU/s1600/dirsync&#43;rule.png"><img src="http://1.bp.blogspot.com/-sV_2gnEWJ54/UzpSrP0C_LI/AAAAAAAAJBU/JshPC8DHPjU/s1600/dirsync&#43;rule.png" alt=""  /></a></p>
+<p>After kicked off a full sync by run &ldquo;Start-OnlineCoexistenceSync&rdquo;. </p>
+<p>&ldquo;get-mailuser&rdquo; was able to return with the SMTP addresses &ldquo;contoso.mail.onmicrosoft.com&rdquo;. Mailbox migration to Office 365 went successfully after that.</p>
+]]></content>
+            
+                 
+                    
+                 
+                    
+                         
+                        
+                            
+                             
+                                <category scheme="/tags/Exchange-Hybrid" term="Exchange-Hybrid" label="Exchange Hybrid" />
+                             
+                                <category scheme="/tags/mail.onmicrosoft.com" term="mail.onmicrosoft.com" label="mail.onmicrosoft.com" />
+                             
+                                <category scheme="/tags/Mailbox-Migration" term="Mailbox-Migration" label="Mailbox Migration" />
+                             
+                                <category scheme="/tags/Office-365" term="Office-365" label="Office 365" />
+                            
+                        
+                    
+                
+            
+        </entry>
+    
+</feed>
