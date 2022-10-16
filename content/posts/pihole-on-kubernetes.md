@@ -23,7 +23,7 @@ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.5/confi
 >Make sure your cluster version is compatible with the version of Metallb you are installing.
 >To check your cluster version run `kubectl version` and check **Server Version**.
 
-Next, deploy the config value file below. The file set address range for the load balancer.
+Next, deploy the config value file below. The file sets the address range for the load balancer.
 ```
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
@@ -42,7 +42,7 @@ metadata:
 ---
 ```
 
-After successfully deploy the load balancer, you are now ready to deploy the pod for Pihole.
+After successfully deployed the load balancer, you are now ready to deploy the pod for Pihole.
 
 The manifest for Pihole deployment can be found [here](https://raw.githubusercontent.com/tomkingchen/pihole-kubernetes/main/pihole.yaml).
 
@@ -62,7 +62,7 @@ To publish the Pihole pod, we use two separate services via different IPs. One f
 - Service: pihole-udp (10.1.1.20)
 - Service: pihole (10.1.1.19)
 
-> In your environment, please use the spare IPs assigned to the `MetalLB` load balancer. For example in my lab, 10.1.1.18 is already assigned to Istio gateway. So I cannot use that address for Pihole services.
+> In your environment, please use the spare IPs assigned to the `MetalLB` load balancer. For example in my lab, 10.1.1.18 is already assigned to Istio gateway. Assign that address for Pihole services will not work.
 
 If everything deployed successfully, you should be able to visit http://10.1.1.19/admin and see the pretty Pihole login page. 
 
