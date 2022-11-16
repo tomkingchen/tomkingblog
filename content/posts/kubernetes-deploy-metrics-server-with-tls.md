@@ -1,12 +1,12 @@
 ---
-title: "Kubernetes Deploy Metrics Server With Tls"
+title: "Deploy Metrics-server in Kubernetes with TLS enabled"
 date: 2022-11-10T13:50:40+11:00
 draft: false
 ---
 
 Metrics-server is one of the most common service deployed in their Kubernetes clusters. It is designed to be used for autoscaling purposes. In my case, I simply want to have a way to easily check my nodes status with `kubectl top node`.
 
-In this post I will walk you through the steps I took to get `metrics-server` deployed and working on a local Kubernetes cluster. There are a few interesting issues I bumped into along the way. I will show you how I did troubleshooting and solved them.
+In this post I will walk you through the steps I took to get `metrics-server` deployed on a local Kubernetes cluster. There are a few interesting issues I bumped into along the way. I will show you how I did troubleshooting and solved them.
 
 Some information about the environment I used for this deployment.
 - Kubernetes cluster version 1.23.3
@@ -35,11 +35,11 @@ Well you can simply disable TLS for metrics-server to avoid the error, but since
 ```
 2. Run the command below to edit the kubelet-config-1.23 (should be your own cluster version here) ConfigMap in the kube-system namespace. In the ConfigMap, add `serverTLSBootstrap: true`. `kubectl edit` works just like normal [vim](https://en.wikipedia.org/wiki/Vim_(text_editor)). Insert `serverTLSBootstrap: true` just underneath line `kind: KubeletConfiguration`. Save the file with `SHIFT+zz`.
 ```bash
-➜ kubectl edit configmap kubelet-config-1.23 -n kube-system
+kubectl edit configmap kubelet-config-1.23 -n kube-system
 ```
 3. Check ConfigMap after the change and make sure `serverTLSBootstrap` is added.
 ```bash
-➜ kubectl get cm kubelet-config-1.23 -n kube-system -o yaml
+kubectl get cm kubelet-config-1.23 -n kube-system -o yaml
 ```
 Output should look like this, make sure the indentation is correct:
 ```yaml
@@ -79,7 +79,7 @@ csr-zfn8q   49s   kubernetes.io/kubelet-serving                 system:node:tom-
 ```
 7. Approve them with this command
 ```bash
-➜ kubectl certificate approve <CSR-name>
+kubectl certificate approve <CSR-name>
 ```
 8. Check CSRs status again and you should see they are now approved.
 ```bash
@@ -103,7 +103,7 @@ Here is [the documentation](https://kubernetes.io/docs/tasks/extend-kubernetes/c
 
 First, SSH to the control node, and check current `kube-apiserver` startup parameters.
 ```bash
-➜ cat /etc/kubernetes/manifests/kube-apiserver.yaml
+cat /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 Here is the output. As you can see I have all necessary command flags described in the document. So there is no changes need to be made in my case.
 ```yaml
@@ -235,19 +235,20 @@ spec:
     name: usr-share-ca-certificates
 status: {}
 ```
-My `metrics-server-xxxx` pod is running on worker node instead of the control node itself, which is not the host `kube-apiserver` pod is running on. So I will need to set flag `--enable-aggregator-routing = true` in the kube-apiserver manifest. So just add `--enable-aggregator-routing=true` as one of the command flags in /etc/kubernetes/manifests/kube-apiserver.yaml file.
+The only change needs to be made is to add `--enable-aggregator-routing=true` as one of the command flags in the same manifest file. This is because my `metrics-server-xxxx` pod is running on worker node instead of the control node itself, which is not where the host `kube-apiserver` pod is running on.
 
 ## Fix Network Configuration
 Frustratingly, metrics-server still refuse to work after enabling aggregator-routing.
-Logs from `metrics-server` pod
+
+Here is the error from from `metrics-server` pod
 ```bash
 E1109 09:44:38.039028       1 scraper.go:140] "Failed to scrape node" err="request failed, status: \"500 Internal Server Error\"" node="tom-lab2"
 ```
-Logs from `kube-apiserver` pod
+Error from `kube-apiserver` pod
 ```bash
 E1110 00:18:23.386884       1 available_controller.go:524] v1beta1.metrics.k8s.io failed with: failing or missing response from https://10.47.0.12:4443/apis/metrics.k8s.io/v1beta1: Get "https://10.47.0.12:4443/apis/metrics.k8s.io/v1beta1": dial tcp 10.47.0.12:4443: connect: no route to host
 ```
-Based on the error, it appears kube-apiserver tries to reach metrics-server via its pod IP address. The kube-apiserver uses NodeIP which is in a completely different subnet. There is no route between the two network. This obviously won't work. In order to fix the issue, I need to configure metrics-server to use NodeIP as well. To do that, I simply add these two lines to metrics manifest file (The file is downloaded from https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml)
+Based on these errors, it appears kube-apiserver was trying to reach metrics-server via its pod IP address. The kube-apiserver uses NodeIP which is in a completely different subnet. There is no route between the two network. This obviously won't work. In order to fix the issue, I need to configure metrics-server to use NodeIP as well. To do that, I simply add these two lines to metric-server manifest file (The file is downloaded from https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml)
 ```yaml
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
