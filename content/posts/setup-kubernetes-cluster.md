@@ -48,7 +48,7 @@ If answer is no, load it with this command.
 sudo modprobe br_netfilter
 ```
 Next is to set `net.bridge.bridge-nf-call-iptables` to 1 in `sysctl` config.
-```
+```bash
 sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
@@ -58,7 +58,7 @@ EOF
 Run `sudo sysctl --system` to reload sysctl.
 ## Install Docker (All Nodes)
 There are a few options when comes to container runtime for Kubernetes. I am personally most familiar with Docker and it tends to be easier to setup.
-```
+```bash
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
@@ -78,7 +78,7 @@ Next we need to create `/etc/docker/daemon.json` with the contents below. This i
 }
 ```
 Run these command to reload Docker
-```
+```bash
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 ```
@@ -94,11 +94,15 @@ sudo apt-mark hold kubelet kubeadm kubectl
 ```
 ## Initialize the control-plane node (Master Node)
 Run `kubeadm init` to initialize the cluster control plane node. `192.168.0.0/16` is the network range I allocated for pod network. `10.1.1.10` is the IP address of the control plane node. It is in `10.1.1.0/24` range, which is where other worker nodes sit in.
-```
+```bash
  sudo kubeadm init --pod-network-cidr 192.168.0.0/16 --apiserver-advertise-address=10.1.1.10
 ```
-Record the output with `kubeadm join` details
+Get cluster join command with its token.
+```bash
+kubeadm token create --print-join-command
 ```
+Join the node into the cluster by paste and run the above command. It should look something like below.
+```bash
 kubeadm join <control-plane-host>:<control-plane-port> --token <token> --discovery-token-ca-cert-hash sha256:<hash>
 ```
 ## Set permission for kubectl
@@ -127,7 +131,11 @@ NAME       STATUS   ROLES                  AGE   VERSION
 tom-lab1   Ready    control-plane,master   73m   v1.23.1
 ```
 ## Join the worker nodes (Workers Nodes)
-Jump onto the Worker nodes and run the command below to join them to the cluster.
+If previous tokens are expired, you can re-create the token by running the command below on the controller node.
+```bash
+kubeadm token create --print-join-command
+```
+SSH onto the Worker nodes and run the command to join the node into the cluster.
 ```
 kubeadm join <control-plane-host>:<control-plane-port> --token <token> --discovery-token-ca-cert-hash sha256:<hash>
 ```
