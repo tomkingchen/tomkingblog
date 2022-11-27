@@ -26,14 +26,15 @@ It is well known that Windows Remote Desktop Service has this feature that allow
 
 1.  Query User to get the SEESION Name and ID
     
-
-C:\\Users\\ben>query user
+```powershell
+C:\Users\ben>query user
 
 USERNAME              SESSIONNAME        ID  STATE   IDLE TIME  LOGON TIME
 
 tom-admin             rdp-tcp#19          4  Active         15  6/22/2019 5:14 AM
 
-\>ben                   rdp-tcp#20          5  Active          .  6/22/2019 6:53 AM
+ben                   rdp-tcp#20          5  Active          .  6/22/2019 6:53 AM
+```
 
 2.  Use SC to create a service which will connect to the privileged account (tom-admin) RDP session from a non-privileged users (Ben) session. The service by default will use SYSTEM account to launch.
     

@@ -9,7 +9,7 @@ There are a lot ARM templates out there can do this. But in this post, we will g
 
 First, let’s build a new VM in Azure with these PowerShell commands. In this case, the VM will have direct Internet and can be accessed via Internet directly. Just to state here that this is definitely not the practice you want to adopt in production.
 
-```
+```powershell
 \# Create a new resource group  
 New-AzureRmResourceGroup \-Name $rsgName \-Location $location  
   
@@ -66,7 +66,7 @@ Next, go to **Credentials** in the Automation Account and create following two c
 
 Now we can start write DSC for the PDC. Below is the code. Save it as a ps1 file. You will notice it requires all those 3 modules we just installed in Azure Automation and the PSCredential it pulls from the Automation Account.
 
-```
+```powershell
 #Requires -module xActiveDirecotry  
 #Requires -module xStorage  
 #Requires -module xPendingReboot  
@@ -137,7 +137,7 @@ Apart from install the necessary roles and features, another thing worth noting 
 
 Now, our original VM created with PowerShell does not have a 2nd disk attached. Let’s use the commands below to achieve that.
 
-```
+```powershell
 \# Add a managed disk to VM  
 $rsgName \= "tomlab-au"  
 $location \= "Australia Southeast"  
@@ -157,7 +157,7 @@ Next we upload our DSC script to Azure.
 
 After upload the script, we need to compile it so it can be pushed to the Azure Windows VM. This is done through the PowerShell script below. As you can see, we need to specify the parameters and configData.
 
-```
+```powershell
 Param(  
 \[Parameter(Mandatory=$True)\]  
 \[String\]$rsgName,  

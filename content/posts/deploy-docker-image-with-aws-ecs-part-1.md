@@ -11,7 +11,7 @@ As the first step, we need to provision the ECR with CloudFormation template.
 Below is a simple CFN template written in YAML.  
   
 
-```
+```yaml
 AWSTemplateFormatVersion: "2010-09-09"  
   
 Description: \>  
@@ -43,9 +43,8 @@ Outputs:
 Deploy the CFN template with AWS CLI command below.  
   
 
-```
+```bash
 aws cloudformation create-stack --stack-name createecs --template-body file://mytemplate.yaml --parameters ParameterKey=RepoName,ParameterValue=webfront  
-
 ```
 
 After the template is successfully deployed, go to ECS in AWS Console and confirm the repository and cluster is created.  
@@ -60,17 +59,17 @@ Create a file named as “Dockfile” in the folder. Yes, it does not have an ex
 Copy the code below to the file. The Dockerfile basically uses a Ubuntu image and installed Apache web service on it along with a simple webpage named index.html.  
   
 
-```
+```Dockerfile
 FROM ubuntu:12.04  
   
-\# Install dependencies  
+# Install dependencies  
 RUN apt-get update -y  
 RUN apt-get install -y apache2  
   
-\# Install apache and write hello world message  
+# Install apache and write hello world message  
 RUN echo "Hello World!" > /var/www/index.html  
   
-\# Configure apache  
+# Configure apache  
 RUN a2enmod rewrite  
 RUN chown -R www-data:www-data /var/www  
 ENV APACHE\_RUN\_USER www-data  
@@ -86,18 +85,16 @@ CMD \["/usr/sbin/apache2", "-D",  "FOREGROUND"\]
 Save the file and we can now build the image.  
   
 
-```
-docker build -t webserver .  
-
+```bash
+docker build -t webserver .
 ```
 
 Before we upload the image to ECR, we need to test it out locally first.  
 Before you run the image (create the container), make sure port 80 on your local machine is not used.  
   
 
-```
+```bash
 docker run -p 80:80 webserver  
-
 ```
 
 Now, test access to [http://localhost](http://localhost/), you should see the “Hello World” page.  
@@ -106,9 +103,8 @@ The image is now ready to be pushed to AWS ECR.
 First, we need to retrieve the login information to authenticate our local Docker client with ECR. Run the command below and **COPY the output.** Change the region parameter if your ECR is in a different region.  
   
 
-```
+```bash
 aws ecr get-login --no-include-email --region ap-southeast-1  
-
 ```
 
 The output of the command should look like something below.  
@@ -121,9 +117,8 @@ Tag the image you got and make it ready for the push. If you run docker images, 
 You can now push the image.  
   
 
-```
+```bash
 docker push 1234567891011.dkr.ecr.ap-southeast-1.amazonaws.com/webfront:latest  
-
 ```
 
 It may take sometime for the image to be uploaded. But eventually you should see something like below.  

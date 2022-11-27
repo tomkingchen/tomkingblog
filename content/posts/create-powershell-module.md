@@ -7,7 +7,7 @@ url: /2018/09/create-powershell-module.html
 
 Recently I came across an issue on our Hyper-V Cluster. One of the VM was stuck in the “Stopping” state. I had to force the VM to shutdown by kill its process on the Hyper-V host. To do so, I first find out the VM’s GUID and then kill the process with the same GUID. Needless to say, the whole process can be achieved with the PowerShell commands below.
 
-```
+```powershell
 \# Get the VM GUID and find the process with the GUID  
 $VM \= Get-VM \-Name $VMName \-ErrorAction Stop  
 $VMGUID \= $VM.Id  
@@ -22,7 +22,7 @@ This is a pretty short and simple script, which is perfect for making a module. 
 
 Alright, let’s convert the script into a module then. Here’s the script Kill-VM.ps1. Let’s save it as Kill-VM.psm1. And now we have a module! That’s it?! Noooo… of course not. There are a few things we need to change with the script, before we can call it a proper module.
 
-```
+```powershell
 #requires -module Hyper-V  
 #requires -runasadministrator  
   
@@ -56,7 +56,7 @@ First, we need to give a name to our module. Let’s call it “VMKiller”! “
 
 Create a folder named “VMKiller” under “C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\Modules”. There are a few other default folders for PowerShell modules. You can find them out by run the command below.
 
-```
+```powershell
 $env:PSModulePath  
 
 ```
@@ -69,7 +69,7 @@ We will also add Begin, Process and End section to handle Pipeline input for the
 
 Below is the code in VMKiller.psm1 after above changes.
 
-```
+```powershell
 Function Kill-VM  
 {  
     \[CmdletBinding(SupportsShouldProcess=$True)\]  
@@ -104,7 +104,7 @@ Function Kill-VM
 
 Next, to make our module more understandable to future readers, we will add some Comment based Help information into the code. Comment based Help will allow users to read about the module function by using Get-Help command. You can read more about Comment Based Help from [here](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-6).
 
-```
+```powershell
 <#  
 .SYNOPSIS  
 Kill a VM Process.  
@@ -126,7 +126,7 @@ The VMKiller module so far only contains a single function, and a single psm1 fi
 
 It is not necessary to create Module Manifest, while we have only one single psm1 file. Without the Manifest, PowerShell will try to load _ModuleName.DLL_ first. If that is not successful, it will then try _ModuleName.psm1_. But in this case we will create one anyway. To create the manifest, use the command below.
 
-```
+```powershell
 New-ModuleManifest –path .\\VMKiller.psd1  –RootModule VMKiller.psm1  
 
 ```

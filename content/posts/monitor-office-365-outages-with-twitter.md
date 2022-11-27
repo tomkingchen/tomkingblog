@@ -36,7 +36,7 @@ Now we just need a PowerShell module that uses Twitter API to pull out tweets. A
 
 First, we create a authenticated session with the generated app tokens.
 
-```
+```powershell
 New-MyTwitterConfiguration \-APIKey YourTwitterAppAPIKey \`  
 \-APISecret YourTwitterAppAPISecret \`  
 \-AccessToken YourTwitterAppAccessToken \`  
@@ -46,7 +46,7 @@ New-MyTwitterConfiguration \-APIKey YourTwitterAppAPIKey \`
 
 Next, we use Get-TweetTimeline to get recent tweets from @Office365Status account. Then we grab the first item from the array, which is the latest tweet from the account.
 
-```
+```powershell
 $TimeLine \= Get-TweetTimeline \-UserName "office365status" \-MaximumTweets 100   
 $tweet \= $TimeLine\[0\]   
 
@@ -60,11 +60,9 @@ Twitter original creation time format:
 
 To convert the time we use a Convert-DateString function.
 
-```
-$createTime \= Convert-DateString \-Date $tweet.created\_at \`
-``````
-\-Format 'ddd MMM dd HH:mm:ss zzzz yyyy'  
-
+```powershell
+$createTime = Convert-DateString -Date $tweet.created_at \`
+-Format 'ddd MMM dd HH:mm:ss zzzz yyyy'
 ```
 
 ddd = First 3 letter of weekday.
@@ -83,7 +81,7 @@ The function uses .Net method TryParseExact to convert the time format to someth
 
 [![image](https://lh3.googleusercontent.com/-ijXZuR9Re_c/W12X7tgzLiI/AAAAAAAAKKY/EdOmprvEeQYekzQu7MI9aZTwT4pB5HhDACHMYCw/image_thumb%255B6%255D?imgmax=800 "image")](https://lh3.googleusercontent.com/-12vIAsjFFQU/W12X6kad5eI/AAAAAAAAKKU/-GNbRmhKcTwrBma5Q4hpDLd3jBJpTfNkACHMYCw/s1600-h/image%255B14%255D)
 
-```
+```powershell
 function Convert-DateString (\[String\]$Date, \[String\[\]\]$Format)  
 {  
    $result \= New-Object DateTime  
@@ -106,14 +104,14 @@ The script will then check if the tweet is created within last hour. Depends on 
 
 Upon confirm the tweet is posted within last hour and is not a reply tweet, the script will then send out an email to a monitoring mailbox (Not your Office 365 mailbox of course!).
 
-```
-if ($tweet.in\_reply\_to\_user\_id\_str \-like ""){  
-    \# If the tweet is created within last hour, send out alert  
-    if ($createTime \-gt (get-date).Addhours(-1)){  
+```powershell
+if ($tweet.in_reply_to_user_id_str -like ""){  
+    # If the tweet is created within last hour, send out alert  
+    if ($createTime -gt (get-date).Addhours(-1)){  
           
-        $body \= $tweet.text  
-        $Emailsubject \= "Microsoft Office365Status Twitter Account just post a new update"  
-        Send-MailMessage \-from "tom.chen@contoso.com" \-To "it@contoso.com" \-SmtpServer mailserver.contoso.com \-Subject $Emailsubject \-Body $body  
+        $body = $tweet.text  
+        $Emailsubject = "Microsoft Office365Status Twitter Account just post a new update"  
+        Send-MailMessage -from "tom.chen@contoso.com" -To "it@contoso.com" -SmtpServer mailserver.contoso.com -Subject $Emailsubject -Body $body  
     }else{  
         return  
     }  

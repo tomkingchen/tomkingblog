@@ -37,7 +37,7 @@ For a EC2 ECS cluster, container agent runs on each Container Instance. It is th
 
 To learn more about ECS basic concepts, you can refer to [this AWS document](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html).
 
-**1\. Create Task Definition**
+**1. Create Task Definition**
 
 The first step we take is to create a new Task Definition.
 
@@ -69,33 +69,33 @@ Click Create **to create the Task Definition.**
 
 The Task Definition can also be created with JSON. Below is the code.
 
-```
+```json
 {  
   "executionRoleArn": null,  
-  "containerDefinitions": \[  
+  "containerDefinitions": [  
     {  
       "dnsSearchDomains": null,  
       "logConfiguration": null,  
       "entryPoint": null,  
-      "portMappings": \[  
+      "portMappings": [  
         {  
           "hostPort": 80,  
           "protocol": "tcp",  
           "containerPort": 80  
         }  
-      \],  
+      ],  
       "command": null,  
       "linuxParameters": null,  
       "cpu": 512,  
-      "environment": \[\],  
+      "environment": [],  
       "ulimits": null,  
       "dnsServers": null,  
-      "mountPoints": \[\],  
+      "mountPoints": [],  
       "workingDirectory": null,  
       "dockerSecurityOptions": null,  
       "memory": 512,  
       "memoryReservation": 256,  
-      "volumesFrom": \[\],  
+      "volumesFrom": [],  
       "image": "12345678910.dkr.ecr.ap-southeast-1.amazonaws.com/testweb:latest",  
       "disableNetworking": null,  
       "interactive": null,  
@@ -112,16 +112,16 @@ The Task Definition can also be created with JSON. Below is the code.
       "privileged": null,  
       "name": "testweb"  
     }  
-  \],  
-  "placementConstraints": \[\],  
+  ],  
+  "placementConstraints": [],  
   "memory": "512",  
   "taskRoleArn": null,  
-  "compatibilities": \[  
+  "compatibilities": [  
     "EC2"  
-  \],  
+  ],  
   "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:297012811963:task-definition/testweb-task:1",  
   "family": "testweb-task",  
-  "requiresAttributes": \[  
+  "requiresAttributes": [  
     {  
       "targetId": null,  
       "targetType": null,  
@@ -134,22 +134,21 @@ The Task Definition can also be created with JSON. Below is the code.
       "value": null,  
       "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"  
     }  
-  \],  
-  "requiresCompatibilities": \[  
+  ],  
+  "requiresCompatibilities": [  
     "EC2"  
-  \],  
+  ],  
   "networkMode": null,  
   "cpu": "1024",  
   "revision": 1,  
   "status": "ACTIVE",  
-  "volumes": \[\]  
+  "volumes": []  
 }  
 
 ```
 
-  
 
-**2\. Create ECS Cluster**
+**2. Create ECS Cluster**
 
 Under Amazon ECS click **Clusters** and click **Create Cluster**.
 
@@ -181,7 +180,7 @@ From the CloudFormation stack details, we can see all the script did was to prov
 
 Here is the CloudFormation Template code.
 
-```
+```yaml
 AWSTemplateFormatVersion: '2010-09-09'  
 Description: \>  
   AWS CloudFormation template to create a new VPC  
@@ -301,12 +300,12 @@ Parameters:
     Description: Optional - Specifies the Type of (Amazon EBS) volume  
     Default: ''  
     AllowedValues:  
-      \- ''  
-      \- standard  
-      \- io1  
-      \- gp2  
-      \- sc1  
-      \- st1  
+      - ''  
+      - standard  
+      - io1  
+      - gp2  
+      - sc1  
+      - st1  
     ConstraintDescription: Must be a valid EC2 volume type.  
   DeviceName:  
     Type: String  
@@ -324,8 +323,8 @@ Parameters:
     Type: String  
     Default: 'diversified'  
     AllowedValues:  
-      \- 'lowestPrice'  
-      \- 'diversified'  
+      - 'lowestPrice'  
+      - 'diversified'  
   UserData:  
     Type: String  
   IsWindows:  
@@ -333,25 +332,25 @@ Parameters:
     Default: 'false'  
 Conditions:  
   CreateEC2LCWithKeyPair:  
-    !Not \[!Equals \[!Ref KeyName, ''\]\]  
+    !Not [!Equals [!Ref KeyName, '']]  
   SetEndpointToECSAgent:  
-    !Not \[!Equals \[!Ref EcsEndpoint, ''\]\]  
+    !Not [!Equals [!Ref EcsEndpoint, '']]  
   CreateNewSecurityGroup:  
-    !Equals \[!Ref SecurityGroupId, ''\]  
+    !Equals [!Ref SecurityGroupId, '']  
   CreateNewVpc:  
-    !Equals \[!Ref VpcId, ''\]  
+    !Equals [!Ref VpcId, '']  
   CreateSubnet1: !And  
-    \- !Not \[!Equals \[!Ref SubnetCidr1, ''\]\]  
-    \- !Condition CreateNewVpc  
+    - !Not [!Equals [!Ref SubnetCidr1, '']]  
+    - !Condition CreateNewVpc  
   CreateSubnet2: !And  
-    \- !Not \[!Equals \[!Ref SubnetCidr2, ''\]\]  
-    \- !Condition CreateSubnet1  
+    - !Not [!Equals [!Ref SubnetCidr2, '']]  
+    - !Condition CreateSubnet1  
   CreateSubnet3: !And  
-    \- !Not \[!Equals \[!Ref SubnetCidr3, ''\]\]  
-    \- !Condition CreateSubnet2  
-  CreateWithSpot: !Equals \[!Ref UseSpot, 'true'\]  
-  CreateWithASG: !Not \[!Condition CreateWithSpot\]  
-  CreateWithSpotPrice: !Not \[!Equals \[!Ref SpotPrice, ''\]\]  
+    - !Not [!Equals [!Ref SubnetCidr3, '']]  
+    - !Condition CreateSubnet2  
+  CreateWithSpot: !Equals [!Ref UseSpot, 'true']  
+  CreateWithASG: !Not [!Condition CreateWithSpot]  
+  CreateWithSpotPrice: !Not [!Equals [!Ref SpotPrice, '']]  
 Resources:  
   Vpc:  
     Condition: CreateSubnet1  
@@ -366,7 +365,7 @@ Resources:
     Properties:  
       VpcId: !Ref Vpc  
       CidrBlock: !Ref SubnetCidr1  
-      AvailabilityZone: !Select \[ 0, !Ref VpcAvailabilityZones \]  
+      AvailabilityZone: !Select [ 0, !Ref VpcAvailabilityZones ]  
       MapPublicIpOnLaunch: true  
   PubSubnetAz2:  
     Condition: CreateSubnet2  
@@ -374,7 +373,7 @@ Resources:
     Properties:  
       VpcId: !Ref Vpc  
       CidrBlock: !Ref SubnetCidr2  
-      AvailabilityZone: !Select \[ 1, !Ref VpcAvailabilityZones \]  
+      AvailabilityZone: !Select [ 1, !Ref VpcAvailabilityZones ]  
       MapPublicIpOnLaunch: true  
   PubSubnetAz3:  
     Condition: CreateSubnet3  
@@ -382,7 +381,7 @@ Resources:
     Properties:  
       VpcId: !Ref Vpc  
       CidrBlock: !Ref SubnetCidr3  
-      AvailabilityZone: !Select \[ 2, !Ref VpcAvailabilityZones \]  
+      AvailabilityZone: !Select [ 2, !Ref VpcAvailabilityZones ]  
       MapPublicIpOnLaunch: true  
   InternetGateway:  
     Condition: CreateSubnet1  
@@ -429,7 +428,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup  
     Properties:  
       GroupDescription: ECS Allowed Ports  
-      VpcId: !If \[ CreateSubnet1, !Ref Vpc, !Ref VpcId \]  
+      VpcId: !If [ CreateSubnet1, !Ref Vpc, !Ref VpcId ]  
       SecurityGroupIngress:  
         IpProtocol: tcp  
         FromPort: !Ref SecurityIngressFromPort  
@@ -440,13 +439,13 @@ Resources:
     Condition: CreateWithASG  
     Properties:  
       ImageId: !Ref EcsAmiId  
-      InstanceType: !Select \[ 0, !Ref EcsInstanceType \]  
+      InstanceType: !Select [ 0, !Ref EcsInstanceType ]  
       AssociatePublicIpAddress: true  
       IamInstanceProfile: !Ref IamRoleInstanceProfile  
-      KeyName: !If \[ CreateEC2LCWithKeyPair, !Ref KeyName, !Ref "AWS::NoValue" \]  
-      SecurityGroups: \[ !If \[ CreateNewSecurityGroup, !Ref EcsSecurityGroup, !Ref SecurityGroupId \] \]  
+      KeyName: !If [ CreateEC2LCWithKeyPair, !Ref KeyName, !Ref "AWS::NoValue" ]  
+      SecurityGroups: [ !If [ CreateNewSecurityGroup, !Ref EcsSecurityGroup, !Ref SecurityGroupId ] ]  
       BlockDeviceMappings:  
-      \- DeviceName: !Ref DeviceName  
+      - DeviceName: !Ref DeviceName  
         Ebs:  
          VolumeSize: !Ref EbsVolumeSize  
          VolumeType: !Ref EbsVolumeType  
@@ -457,25 +456,25 @@ Resources:
     Condition: CreateWithASG  
     Properties:  
       VPCZoneIdentifier: !If  
-        \- CreateSubnet1  
-        \- !If  
-          \- CreateSubnet2  
-          \- !If  
-            \- CreateSubnet3  
-            \- \[ !Sub "${PubSubnetAz1},  ${PubSubnetAz2},  ${PubSubnetAz3}" \]  
-            \- \[ !Sub "${PubSubnetAz1},  ${PubSubnetAz2}" \]  
-          \- \[ !Sub "${PubSubnetAz1}" \]  
-        \- !Ref SubnetIds  
+        - CreateSubnet1  
+        - !If  
+          - CreateSubnet2  
+          - !If  
+            - CreateSubnet3  
+            - [ !Sub "${PubSubnetAz1},  ${PubSubnetAz2},  ${PubSubnetAz3}" ]  
+            - [ !Sub "${PubSubnetAz1},  ${PubSubnetAz2}" ]  
+          - [ !Sub "${PubSubnetAz1}" ]  
+        - !Ref SubnetIds  
       LaunchConfigurationName: !Ref EcsInstanceLc  
       MinSize: '0'  
       MaxSize: !Ref AsgMaxSize  
       DesiredCapacity: !Ref AsgMaxSize  
       Tags:  
-        \-  
+        -  
           Key: Name  
-          Value: !Sub "ECS  Instance  \-  ${AWS::StackName}"  
+          Value: !Sub "ECS  Instance  -  ${AWS::StackName}"  
           PropagateAtLaunch: 'true'  
-        \-  
+        -  
           Key: Description  
           Value: "This  instance  is  the  part  of  the  Auto  Scaling  group  which  was  created  through  ECS  Console"  
           PropagateAtLaunch: 'true'  
@@ -487,31 +486,31 @@ Resources:
         AllocationStrategy: !Ref SpotAllocationStrategy  
         IamFleetRole: !Ref IamSpotFleetRoleArn  
         TargetCapacity: !Ref AsgMaxSize  
-        SpotPrice: !If \[ CreateWithSpotPrice, !Ref SpotPrice, !Ref 'AWS::NoValue' \]  
+        SpotPrice: !If [ CreateWithSpotPrice, !Ref SpotPrice, !Ref 'AWS::NoValue' ]  
         TerminateInstancesWithExpiration: true  
         LaunchSpecifications:   
-            \-  
+            -  
               IamInstanceProfile:  
                 Arn: !Ref IamRoleInstanceProfile  
               ImageId: !Ref EcsAmiId  
-              InstanceType: !Select \[ 0, !Ref EcsInstanceType \]  
-              KeyName: !If \[ CreateEC2LCWithKeyPair, !Ref KeyName, !Ref "AWS::NoValue" \]  
+              InstanceType: !Select [ 0, !Ref EcsInstanceType ]  
+              KeyName: !If [ CreateEC2LCWithKeyPair, !Ref KeyName, !Ref "AWS::NoValue" ]  
               Monitoring:  
                 Enabled: true  
               SecurityGroups:  
-                \- GroupId: !If \[ CreateNewSecurityGroup, !Ref EcsSecurityGroup, !Ref SecurityGroupId \]  
+                - GroupId: !If [ CreateNewSecurityGroup, !Ref EcsSecurityGroup, !Ref SecurityGroupId ]  
               SubnetId: !If  
-                      \- CreateSubnet1  
-                      \- !If  
-                        \- CreateSubnet2  
-                        \- !If  
-                          \- CreateSubnet3  
-                          \- !Join \[ "," , \[ !Ref PubSubnetAz1, !Ref PubSubnetAz2, !Ref PubSubnetAz3 \] \]  
-                          \- !Join \[ "," , \[ !Ref PubSubnetAz1, !Ref PubSubnetAz2 \] \]  
-                        \- !Ref PubSubnetAz1  
-                      \- !Join \[ "," , !Ref SubnetIds \]  
+                      - CreateSubnet1  
+                      - !If  
+                        - CreateSubnet2  
+                        - !If  
+                          - CreateSubnet3  
+                          - !Join [ "," , [ !Ref PubSubnetAz1, !Ref PubSubnetAz2, !Ref PubSubnetAz3 ] ]  
+                          - !Join [ "," , [ !Ref PubSubnetAz1, !Ref PubSubnetAz2 ] ]  
+                        - !Ref PubSubnetAz1  
+                      - !Join [ "," , !Ref SubnetIds ]  
               BlockDeviceMappings:  
-                    \- DeviceName: !Ref DeviceName  
+                    - DeviceName: !Ref DeviceName  
                       Ebs:  
                        VolumeSize: !Ref EbsVolumeSize  
                        VolumeType: !Ref EbsVolumeType  
@@ -581,7 +580,7 @@ SubnetCidr3:
 
 SubnetIds: subnet-057b8e2cd11183e28
 
-UserData: #!/bin/bash echo ECS\_CLUSTER=testweb-clu >> /etc/ecs/ecs.config;echo ECS\_BACKEND\_HOST= >> /etc/ecs/ecs.config;
+UserData: #!/bin/bash echo ECS_CLUSTER=testweb-clu >> /etc/ecs/ecs.config;echo ECS_BACKEND_HOST= >> /etc/ecs/ecs.config;
 
 UseSpot: false
 
@@ -591,7 +590,7 @@ VpcCidr: 10.0.0.0/16
 
 VpcId: vpc-08d111d48c2f68111
 
-**3\. Create Service**
+**3. Create Service**
 
 Back in ECS, click the Cluster name.
 
@@ -609,7 +608,7 @@ Leave AutoScaling as “Do not adjust…”.
 
 Click **Create Service** to create the service.
 
-**4\. Test**
+**4. Test**
 
 Once the service is successfully created, The cluster will then start to provision the Container Instance and deploy the container image onto it. This process does seem to take time. In my case, it took around 55 minutes for the container to be started! So you definitely want to warm up your cluster in production.
 

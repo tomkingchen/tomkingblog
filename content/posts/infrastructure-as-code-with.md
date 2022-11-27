@@ -13,7 +13,7 @@ The Linux server is provisioned through a CloudFormation template. This allows a
 
 Let’s start with the parameters of the template. In the parameters, we provide VPCId, serverName, SubnetId, KeyPairName, S3URL and an UpdateString. A lot of these are self explanatory. I have provide reasons for why we need UpdateString in the later part of this article.
 
-```
+```yaml
 Parameters:   
   VPCId:  
     Type: String  
@@ -44,7 +44,7 @@ The CloudFormation template contains only two resources: a Security Group and EC
 
 There is nothing special about the security group. It simply allows HTTP and SSH access to the box.
 
-```
+```yaml
   redirSG:  
     Type: AWS::EC2::SecurityGroup  
     Properties:  
@@ -71,7 +71,7 @@ The EC2 resource though, needs quite bit work to for Apache configuration. It us
 
 First, we define the AWS::CloudFormation::Init metadata. Note, all this key words are case sensitive. So be mindful when you type them in. Once I spend hours to workout it is a lower case caused by template to fail.
 
-```
+```yaml
   Metadata:  
       AWS::CloudFormation::Init:  
         config:  
@@ -153,7 +153,7 @@ That summarizes the cfn-init configuration. Now let’s look at the EC2 properti
 
 The Properties contains the usual elements: KeyName, ImageId, InstanceType, NetworkInstances and UserData.
 
-```
+```yaml
 Properties:  
       KeyName: !Ref KeyPairName  
       ImageId:   

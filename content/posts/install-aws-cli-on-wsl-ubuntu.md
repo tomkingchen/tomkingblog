@@ -11,44 +11,38 @@ Before we install AWS CLI package itself, we need to get Python package manager 
 
 Download pip install script. Notice I use –k here, this is because I am running this behind company proxy, the proxy changes HTTPS certificate to its own certificate. Without –k the command will fail. You can leave it out if you have direct Internet access
 
-```
+```bash
 $ curl -O -k https://bootstrap.pypa.io/get-pip.py  
-
 ```
 
 Next, the usual update apt command
 
-```
+```bash
 $ sudo apt-gt update  
-
 ```
 
 Then we download and install Python minimal
 
-```
+```bash
 $ sudo apt install python-minimal  
-
 ```
 
 Now we can install pip, the --trusted-host here is again due to the fact that I am downloading all these packages behind proxy.
 
-```
+```bash
 $ python get-pip.py --user --trusted-host=files.pythonhosted.org  
-
 ```
 
 Next, verify that pip is installed correctly.
 
-```
+```bash
 $ pip --version  
-
 ```
 
 Finally, we can now use pip to install the AWS CLI.
 
-```
+```bash
 $ pip install awscli --upgrade --user  
-
 ```
 
 Verify the install by run aws --version.
@@ -59,9 +53,8 @@ AWS CLI from the WSL does have autocomplete provided natively. Otherwise there i
 
 To install aws-shell, run the pip install command below
 
-```
+```bash
 $ pip install aws-shell –-user  
-
 ```
 
 Run aws-shell to get into the shell. The tool will not only prompt for parameters, but can also retrieve information from AWS and promote for completion, like existing stack name, Security Group Ids, etc.
