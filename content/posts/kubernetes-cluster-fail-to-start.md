@@ -54,7 +54,9 @@ echo -n | openssl s_client -connect localhost:10257 2>&1 | sed -ne '/-BEGIN CERT
 > ⚠️**NOTE**
 > 
 > My cluster version is 1.23.3.
-> Kubeadm version is 1.23.1
+> 
+> Kubeadm version is 1.23.1.
+> 
 > In certain scenario, you might have to re-join the worker nodes to the cluster again. 
 
 
