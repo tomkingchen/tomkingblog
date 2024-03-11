@@ -1,5 +1,5 @@
 ---
-title: "Fix Ubuntu APT Update After Kubernetes Package Repo Change"
+title: "Fix Ubuntu APT Update Error After Kubernetes Package Repo Change"
 date: 2024-03-11T11:25:27+11:00
 draft: false
 ---
