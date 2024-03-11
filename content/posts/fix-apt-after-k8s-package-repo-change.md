@@ -36,7 +36,7 @@ echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] \https://pkgs
 
 Last, you need to download the public signing key for the Kubernetes package repositories.
 ```Bash
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.26./deb/Rlease.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-ap-keyring.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.26/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 ```
 
 That's it. Now you should be able to run `sudo apt update` without errors.
