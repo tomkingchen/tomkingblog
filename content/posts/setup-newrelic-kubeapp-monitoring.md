@@ -38,7 +38,7 @@ docker build -t flask-app --platform linux/amd64 .
 
 To test our newly built image: 
 ```Shell
-docker run -it --rm -d -p 5000:5000 -name web flask-app
+docker run -it --rm -d -p 5000:5000 --name web flask-app
 ```
 Now `curl http://localhost:5000`, you should be getting `Hello, World!` in return.
 
@@ -81,13 +81,20 @@ Deploy it with:
 ```bash
 kubectl apply -f deployment.yaml
 ```
-The above steps simply deploy the app as a pod. In order for the web app to be useable, we need to publish it using `Service`. We can do so by run the command below. The service allows the web app to be accessible via `http://[NodeIP]:5000`.
+The above steps simply deploy the app as a pod. In order for the web app to be useable, we need to publish it using `Service`. We can do so by expose the deployment. My Kubernetes cluster runs off a local virtual mahcine. So I simply use `NodePort` to make the service accessible via the node IP address.
 ```bash
 kubectl expose deploy/flask-app --port=5000 --target-port=5000 --name=flask-app-svc --type=NodePort
 ```
-Test the magic:
+
+By default Kubernetes assign a random port number (30000~32000) for the NodePort. To check what is the port number assigned to the service, run the command below.
 ```bash
-curl http://[NodeIP]:5000
+> kubectl get service flask-app-svc
+NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+flask-app-svc   NodePort    10.107.237.31   <none>        5000:30123/TCP   2d1h
+```
+Once we got the port number, test the magic by trying this url:
+```bash
+curl http://[NodeIP]:30123
 ```
 If you see "Hello, World!" again, congratulations—you’re halfway to monitoring bliss!
 
