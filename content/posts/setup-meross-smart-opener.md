@@ -4,7 +4,7 @@ date: 2024-12-27T20:56:55+11:00
 draft: false
 ---
 
-In this post, I’ll guide you through the steps I followed to set up the Meross Smart Garage Door Opener (MSG100) with the Merlin Roller Door (MR555MYQ). I hope it proves helpful to anyone with the same roller door model.
+A bit of change from my usual tech topics. In this post, I’ll guide you through the steps I followed to set up Meross Smart Garage Door Opener (MSG100) with Merlin Roller Door (MR555MYQ). I hope it proves helpful to anyone with the same roller door model.
 
 ### What I got
 
