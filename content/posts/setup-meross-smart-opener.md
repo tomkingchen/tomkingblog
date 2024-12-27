@@ -4,7 +4,9 @@ date: 2024-12-27T20:56:55+11:00
 draft: false
 ---
 
-A bit of change from my usual tech topics. In this post, I’ll guide you through the steps I followed to set up Meross Smart Garage Door Opener (MSG100) with Merlin Roller Door (MR555MYQ). I hope it proves helpful to anyone with the same roller door model.
+Instead of talking about Kubernetes and Observability, this post is all about home automation. I have long been wanting to make my garage door control a bit smarter than using the usual remotes. Recently I was finally able to found a cheap and easy solution! It all started with [this Ozbargain deal](https://www.ozbargain.com.au/node/885492). 
+
+So this post I’ll guide you through the steps I followed to set up Meross Smart Garage Door Opener (MSG100) with Merlin Roller Door (MR555MYQ). I hope it proves helpful to anyone with the same roller door model.
 
 ### What I got
 
