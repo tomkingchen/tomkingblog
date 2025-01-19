@@ -24,7 +24,7 @@ theme = "diary"
     lineNos = false
     lineNumbersInTable = true
     noClasses = true
-    style = "perldoc"
+    style = "rose-pine-moon"
     tabWidth = 4
 
 [params]
