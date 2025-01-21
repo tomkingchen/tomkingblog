@@ -58,10 +58,10 @@ theme="github-light"
 
 # Please visit https://giscus.app/ to generate settings.
 [params.giscus]
-    data_repo="username/repo"
-    data_repo_id="**************************"    
-    data_category="General"
-    data_category_id="*********************"
+    data_repo="tomkingchen/tomkingblog"
+    data_repo_id="MDEwOlJlcG9zaXRvcnk0MDMxNzU1MTI="
+    data_category="Announcements"
+    data_category_id="DIC_kwDOGAf4WM4CmNB2"
     data_mapping="pathname"
     data_strict="0"
     data_reactions_enabled="1"
