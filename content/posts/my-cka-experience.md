@@ -1,7 +1,7 @@
 ---
 title: "My Cka Experience"
 date: 2024-09-27T21:02:22+10:00
-featured_image: "/images/kubernetes.jpg"
+featured_image: "https://blogfilesr2.tomking.xyz/kubernetes.jpg"
 draft: false
 ---
 
