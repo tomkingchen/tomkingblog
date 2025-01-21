@@ -1,110 +1,90 @@
-baseURL = '/'
-languageCode = 'en-us'
-title = 'Tom Tech Blog'
-theme = 'hugo-geekblog'
+baseURL = "/"
+DefaultContentLanguage = "en" # Theme's display language, supports: en, fr, zh, zh-hant
+languageCode = "en-us"
+title = "Tom Tech Notes"
+theme = "diary"
 
-paginate = 5
-pluralizeListTitles = false
+# Generate sitemap in the public folder
+[sitemap]
+  changefreq = "always"
+  filename = "sitemap.xml" 
+  priority = 0.5
 
-# Required to get well formatted code blocks
-pygmentsUseClasses = true
-pygmentsCodeFences = true
-disablePathToLower = true
-enableGitInfo = true
-
-# Required if you want to render robots.txt template
-enableRobotsTXT = true
+# Google Analytics
+[services]
+  [services.googleAnalytics]
+    id = "G-XXXXXXXXXX"  # Your Google Analytics ID
 
 [markup]
-  [markup.goldmark.renderer]
-      unsafe = true
-  [markup.tableOfContents]
-    startLevel = 1
-    endLevel = 9
-
-[taxonomies]
-  author = "authors"
-  tag = "tags"
-
-[mediaTypes]
-  [mediaTypes."application/atom+xml"]
-    suffixes = ["xml"]
-
-[outputFormats]
-  [outputFormats.Atom]
-    # https://validator.w3.org/feed/docs/atom.html#whatIsAtom
-    name = "Atom"
-    mediaType = "application/atom+xml"
-    # generated file = <baseName>.<mediaType."application/atom+xml".suffixes[0]> = atom.xml
-    baseName = "feed"
-    isPlainText = false
-    rel = "alternate"
-    isHTML = false
-    noUgly = true
-    permalinkable = false
-
-[outputs]
-  home = ["HTML", "ATOM"]
-  page = ["HTML"]
-  section = ["HTML"]
-  taxonomy = ["HTML"]
-  term = ["HTML", "ATOM"]
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = false
+    hl_Lines = ""
+    lineNoStart = 1
+    lineNos = false
+    lineNumbersInTable = true
+    noClasses = true
+    style = "rose-pine-moon"
+    tabWidth = 4
 
 [params]
-  subtitle = "Share and Learn"
-  description = "This is my personal blog about tech."
-  keywords = []
-  images = []
+subtitle = "Coding, Tech, and Life"
+enableGitalk = false
+enableGiscus = true
 
-  # (Optional, default static/brand.svg) Set the path to a logo for the Geekblog
-  # relative to your 'static/' folder.
-  # logo = "logo.png"
+# Microsoft Clarity (https://clarity.microsoft.com/) is a free user behavior recording and analytics tool
+clarity = "abcdefghzd"
 
-  # (Optional, default 6) Set how many table of contents levels to be showed on page.
-  # Use false to hide ToC, note that 0 will default to 6 (https://gohugo.io/functions/default/)
-  # You can also specify this parameter per page in front matter.
-  geekblogToC = 3
+# Twitter Card and Open Graph settings
+enableOpenGraph = true
+enableTwitterCards = true
+title = "Tom Tech Notes" # will set 'og:site_name'
+description = "Coz Blog is no longer cool"  # will set 'og:description'
 
-  # (Optional, default none) Add a link to your Legal Notice page to the site footer.
-  # It can be either a remote url or a local file path relative to your content directory.
-  # geekblogLegalNotice = "https://blog.example.com/legal"
+[params.gitalk]
+  owner = "user"
+  repo = "repo name"
+  client_id = "your client id"
+  client_secret = "your client secret"
+[taxonomies]
+   tag = "tags"
+   category = "categories"
 
-  # (Optional, default none) Add a link to your Privacy Policy page to the site footer.
-  # It can be either a remote url or a local file path relative to your content directory.
-  # geekblogPrivacyPolicy = "/privacy"
+[params.utterances]
+repo="your repo"
+term="[ENTER TERM HERE]"
+label="your label"
+theme="github-light"
 
-  # (Optional, default true) Add an anchor link to headlines.
-  geekblogAnchor = true
+# Please visit https://giscus.app/ to generate settings.
+[params.giscus]
+    data_repo="tomkingchen/tomkingblog"
+    data_repo_id="MDEwOlJlcG9zaXRvcnk0MDMxNzU1MTI="
+    data_category="Announcements"
+    data_category_id="DIC_kwDOGAf4WM4CmNB2"
+    data_mapping="pathname"
+    data_strict="0"
+    data_reactions_enabled="1"
+    data_emit_metadata="0"
+    data_input_position="bottom"
+    data_theme="preferred_color_scheme"
+    data_lang="en"
+    crossorigin="anonymous"
 
-  # (Optional, default true) Copy anchor url to clipboard on click.
-  geekblogAnchorCopy = true
 
-  # (Optional, default none) Sites main author.
-  # geekblogAuthor = "john-doe"
-
-  # (Optional, default posts) Set the name of the default content section.
-  geekblogContentSection = "my-pages"
-
-  # (Optional, default true) Enable or disable image lazy loading for images rendered
-  # by the 'img' shortcode.
-  geekblogImageLazyLoading = true
-
-  # (Optional, default false) Set HTMl <base> to .Site.BaseURL if enabled. It might be required
-  # if a subdirectory is used within Hugo's BaseURL.
-  # See https://developer.mozilla.org/de/docs/Web/HTML/Element/base.
-  geekblogOverwriteHTMLBase = false
-
-  # (Optional, default true) Enable or disable adding tags automatically to the main menu.
-  geekblogTagsToMenu = true
-
-  # (Optional, default none) Adds a "Hosted on <provider>" line to the footer.
-  # Could be used if you want to give credits to your hosting provider.
-  [params.geekblogHostedOn]
-    name = "Cloudflare"
-    link = "https://cloudflare.com/"
-
-  # (Optional, default none) Adds a "Content licensed under <license>" line to the footer.
-  # Could be used if you want to define a default license for your content.
-  [params.geekblogContentLicense]
-    name = "CC BY-SA 4.0"
-    link = "https://creativecommons.org/licenses/by-sa/4.0/"
+[[menu.main]]
+url = "/categories"
+name = "Categories"
+weight = 2
+[[menu.main]]
+url = "/tags"
+name = "Tags"
+weight = 3
+[[menu.main]]
+url = "/posts"
+name = "Archive"
+weight = 1
+[[menu.main]]
+url = "/index.xml"
+name = "RSS Feed"
+weight = 4
