@@ -1,6 +1,7 @@
 ---
-title: "How to config debug Python script with uv in VS Code"
+title: "How to debug Python script with uv in VS Code"
 date: 2026-02-20T10:43:36+11:00
+featured_image: "https://blogfilesr2.tomking.xyz/vscode-debug.jpg"
 draft: false
 ---
 
