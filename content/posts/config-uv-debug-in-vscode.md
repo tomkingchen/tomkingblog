@@ -1,7 +1,7 @@
 ---
 title: "How to config debug Python script with uv in VS Code"
 date: 2026-02-20T10:43:36+11:00
-draft: true
+draft: false
 ---
 
 Under `.vscode` folder:
