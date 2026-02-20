@@ -47,3 +47,7 @@ In your Python script `script.py` paste the dependencies to the top of the file 
 ```
 
 Now you should be able to kickoff debug mode for your script with all required dependencies loaded.
+
+
+## Reference
+https://github.com/astral-sh/uv/issues/8558
