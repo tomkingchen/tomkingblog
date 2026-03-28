@@ -3,12 +3,6 @@ title: "How to Set Up AWS MCP in VS Code with AWS SSO"
 date: 2026-03-28T16:00:55+11:00
 draft: false
 description: "Use AWS MCP in VS Code with an AWS SSO profile instead of relying on the default credential chain."
-tags:
-	- aws
-	- vscode
-	- copilot
-	- mcp
-	- sso
 ---
 
 The AWS MCP examples are straightforward when you use the default AWS credential chain. My setup was a little different because I sign in with AWS SSO through a script that writes credentials to a named AWS profile.
