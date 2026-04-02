@@ -2,6 +2,7 @@
 title: 'Setup Cloudflare for AWS API Gateway'
 date: 2021-06-27T00:25:00.003-07:00
 draft: false
+description: "Setup Cloudflare CDN for AWS API Gateway with custom domain and ACM."
 url: /2021/06/setup-cloudflare-for-aws-api-gateway.html
 ---
 

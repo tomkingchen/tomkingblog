@@ -3,6 +3,7 @@ title: "Setup Meross Smart Garage Door Opener with Merlin Roller door"
 date: 2024-12-27T20:56:55+11:00
 featured_image: "https://blogfilesr2.tomking.xyz/chips.jpg"
 draft: false
+description: "Setup Meross smart garage door opener with Merlin roller door and HomeKit."
 ---
 
 Instead of talking about Kubernetes and Observability, this post is all about home automation. I have long been wanting to make my garage door control a bit smarter than using the usual remotes. Recently I was finally able to found a cheap and easy solution! It all started with [this Ozbargain deal](https://www.ozbargain.com.au/node/885492). 

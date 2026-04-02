@@ -2,6 +2,7 @@
 title: 'VMware Site Recovery Manager Multi-Site Pair Deployment'
 date: 2019-09-06T23:22:00.003-07:00
 draft: false
+description: "Deploy VMware SRM multi-site recovery with shared recovery site configuration."
 url: /2019/09/vmware-site-recovery-manager-multi-site.html
 ---
 

@@ -2,6 +2,7 @@
 title: 'Package and deploy a PowerShell Lambda function with custom modules'
 date: 2020-06-06T05:20:00.003-07:00
 draft: false
+description: "Package and deploy PowerShell Lambda functions with custom modules using SAM."
 url: /2020/06/package-and-deploy-powershell-lambda.html
 tags: 
 - PowerShell

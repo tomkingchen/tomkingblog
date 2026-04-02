@@ -2,6 +2,7 @@
 title: 'The Un-documented Way to Setup AWS SSO with Okta'
 date: 2019-02-22T21:22:00.001-08:00
 draft: false
+description: "Setup AWS SSO with Okta using App Roles instead of privileged user accounts."
 url: /2019/02/the-un-documented-way-to-setup-aws-sso.html
 ---
 

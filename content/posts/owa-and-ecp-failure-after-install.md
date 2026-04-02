@@ -2,6 +2,7 @@
 title: 'OWA and ECP failure after Install Exchange 2016 CU17 '
 date: 2020-11-02T21:07:00.005-08:00
 draft: false
+description: "Fix OWA and ECP failures after Exchange CU17 by replacing corrupted config files."
 url: /2020/11/owa-and-ecp-failure-after-install.html
 ---
 

@@ -2,6 +2,7 @@
 title: 'Create a PowerShell Module'
 date: 2018-09-27T02:18:00.000-07:00
 draft: false
+description: "Create a PowerShell module with proper functions, parameters, and help documentation."
 url: /2018/09/create-powershell-module.html
 ---
 

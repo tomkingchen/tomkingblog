@@ -2,6 +2,7 @@
 title: 'Build a PDC in Azure with DSC'
 date: 2018-09-07T17:19:00.000-07:00
 draft: false
+description: "Automate Azure PDC setup using DSC with PowerShell configuration."
 url: /2018/09/build-pdc-in-azure-with-dsc.html
 ---
 

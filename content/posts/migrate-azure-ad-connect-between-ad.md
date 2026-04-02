@@ -2,6 +2,7 @@
 title: 'Migrate Azure AD Connect Between AD Forests'
 date: 2018-05-10T04:22:00.000-07:00
 draft: false
+description: "Migrate Azure AD Connect between AD forests with staging mode configuration."
 url: /2018/05/migrate-azure-ad-connect-between-ad.html
 ---
 

@@ -2,6 +2,7 @@
 title: 'Use Microsoft Graph API to extract Excel file contents'
 date: 2018-12-09T02:40:00.000-08:00
 draft: false
+description: "Extract Excel file contents from SharePoint using Microsoft Graph API."
 url: /2018/12/use-microsoft-graph-api-to-extract.html
 ---
 

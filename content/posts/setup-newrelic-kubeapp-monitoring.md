@@ -3,6 +3,7 @@ title: "How to monitor Python app in Kubernetes with New Relic APM"
 date: 2024-12-15T16:49:38+11:00
 featured_image: "https://blogfilesr2.tomking.xyz/monitoring.jpg"
 draft: false
+description: "Monitor Python Flask apps in Kubernetes using New Relic APM auto-attach."
 ---
 
 Running a Python Flask web app on Kubernetes without monitoring is like driving without a dashboard: you won’t know when things go south until they do! Here’s how to set up New Relic APM for your app with minimal fuss (and a little fun).

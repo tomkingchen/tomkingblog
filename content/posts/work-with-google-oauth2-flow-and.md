@@ -2,6 +2,7 @@
 title: 'Use PowerShell to delete SPAM Blogger comments'
 date: 2021-02-27T21:29:00.004-08:00
 draft: false
+description: "Delete Blogger SPAM comments using PowerShell and Google OAuth2 API."
 url: /2021/02/work-with-google-oauth2-flow-and.html
 ---
 

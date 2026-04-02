@@ -2,6 +2,7 @@
 title: 'Use Terraform to build server in VMware'
 date: 2019-05-18T00:25:00.001-07:00
 draft: false
+description: "Provision Ubuntu servers in VMware vSphere using Terraform and iPerf3."
 url: /2019/05/use-terraform-to-build-server-in-vmware.html
 ---
 

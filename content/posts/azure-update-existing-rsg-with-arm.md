@@ -2,6 +2,7 @@
 title: 'Azure - Update Existing RSG with ARM Template'
 date: 2018-08-10T14:03:00.000-07:00
 draft: false
+description: "Update existing Azure resources with ARM templates without breaking deployments."
 url: /2018/08/azure-update-existing-rsg-with-arm.html
 ---
 

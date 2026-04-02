@@ -2,6 +2,7 @@
 title: 'Deploy Docker Image with AWS ECS (Part 1)'
 date: 2018-08-24T13:00:00.000-07:00
 draft: false
+description: "Upload Docker images to AWS ECR using CloudFormation and AWS CLI."
 url: /2018/08/deploy-docker-image-with-aws-ecs-part-1.html
 ---
 

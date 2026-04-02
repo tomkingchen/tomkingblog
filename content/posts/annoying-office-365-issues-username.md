@@ -2,6 +2,7 @@
 title: 'Annoying Office 365 issues: Username won''t sync through DirSync'
 date: 2014-06-18T18:03:00.001-07:00
 draft: false
+description: "Fix Office 365 UPN sync issues by revoking licenses before DirSync."
 url: /2014/06/annoying-office-365-issues-username.html
 ---
 

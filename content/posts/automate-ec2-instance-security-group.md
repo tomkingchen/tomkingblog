@@ -2,6 +2,7 @@
 title: 'Automate EC2 Instance Security Group Rules Update'
 date: 2021-06-04T22:47:00.000-07:00
 draft: false
+description: "Automate EC2 security group rules updates using Python and Selenium."
 url: /2021/06/automate-ec2-instance-security-group.html
 ---
 

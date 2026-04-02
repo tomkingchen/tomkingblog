@@ -2,6 +2,7 @@
 title: 'Over the Wall - with help from Azure'
 date: 2018-07-22T22:01:00.003-07:00
 draft: false
+description: "Bypass GFW using Azure P2S VPN and Squid proxy server."
 url: /2018/07/over-wall-with-help-from-azure.html
 tags: 
 - PowerShell

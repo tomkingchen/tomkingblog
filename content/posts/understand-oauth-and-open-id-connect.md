@@ -2,6 +2,7 @@
 title: 'Understand OAuth and Open ID Connect'
 date: 2018-11-17T19:39:00.000-08:00
 draft: false
+description: "Understand OAuth authorization flow and secure delegation using access codes."
 url: /2018/11/understand-oauth-and-open-id-connect.html
 ---
 

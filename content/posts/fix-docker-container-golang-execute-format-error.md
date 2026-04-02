@@ -2,6 +2,7 @@
 title: "Fix Docker Container Golang Execute Format Error"
 date: 2023-12-10T20:12:21+11:00
 draft: false
+description: "Fix Go binary execution errors by compiling for correct CPU architecture."
 ---
 
 Bumped into error `Exec format error` when tried to run a Go binary within a Docker container. The Go binary is compiled from my M2 Macbook. M2 Macbook uses ARM CPU arch. As a result the Go binary was by default complied with ARM CPU arch, which is different from the Docker image's amd64 CPU arch. Hence the execution format error. To fix it, you can take two approaches.

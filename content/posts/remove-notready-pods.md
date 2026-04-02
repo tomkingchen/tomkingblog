@@ -2,6 +2,7 @@
 title: "How to remove NotReady Pods from Kubernetes"
 date: 2022-10-12T16:36:24+11:00
 draft: false
+description: "Remove NotReady pods by uninstalling helm charts or deleting pending jobs."
 ---
 
 ## Problem

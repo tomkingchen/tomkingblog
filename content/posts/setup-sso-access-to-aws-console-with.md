@@ -2,6 +2,7 @@
 title: 'Setup SSO Access to AWS Console with Azure AD'
 date: 2018-06-21T23:05:00.002-07:00
 draft: false
+description: "Setup AWS Console SSO access using Azure AD SAML without root credentials."
 url: /2018/06/setup-sso-access-to-aws-console-with.html
 ---
 

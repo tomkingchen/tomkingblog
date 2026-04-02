@@ -2,6 +2,7 @@
 title: "Deploy Metrics-server in Kubernetes with TLS enabled"
 date: 2022-11-10T13:50:40+11:00
 draft: false
+description: "Deploy metrics-server in Kubernetes with signed kubelet certificates and TLS."
 ---
 
 Metrics-server is one of the most common service deployed in their Kubernetes clusters. It is designed to be used for autoscaling purposes. In my case, I simply want to have a way to easily check my nodes status with `kubectl top node`.

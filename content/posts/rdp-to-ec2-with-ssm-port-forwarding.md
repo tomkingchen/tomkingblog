@@ -2,6 +2,7 @@
 title: 'RDP to EC2 with SSM Port Forwarding'
 date: 2019-10-19T14:05:00.001-07:00
 draft: false
+description: "RDP to EC2 instances securely using SSM Session Manager port forwarding."
 url: /2019/10/rdp-to-ec2-with-ssm-port-forwarding.html
 ---
 

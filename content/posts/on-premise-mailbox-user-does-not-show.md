@@ -2,6 +2,7 @@
 title: 'On Premise Mailbox user missing in Exchange Online GAL'
 date: 2015-11-01T20:12:00.002-08:00
 draft: false
+description: "Fix missing on-premise users in Exchange Online GAL by updating recipient display type."
 url: /2015/11/on-premise-mailbox-user-does-not-show.html
 tags: 
 - GAL

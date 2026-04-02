@@ -2,6 +2,7 @@
 title: 'Enable local timestamp on Office 365 SharePoint site'
 date: 2015-09-14T21:01:00.002-07:00
 draft: false
+description: "Configure SharePoint to display local timestamps for users in different time zones."
 url: /2015/09/enable-local-timestamp-on-office-365.html
 ---
 

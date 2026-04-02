@@ -2,6 +2,7 @@
 title: 'Setup Splunk Universal Forwarder with TLS'
 date: 2021-05-21T18:23:00.005-07:00
 draft: false
+description: "Configure Splunk Universal Forwarder with TLS encryption for syslog intake."
 url: /2021/05/setup-splunk-universal-forwarder-with.html
 ---
 

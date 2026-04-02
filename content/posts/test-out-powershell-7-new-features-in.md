@@ -2,6 +2,7 @@
 title: 'Test out PowerShell 7 new features in WSL1'
 date: 2020-03-21T17:59:00.004-07:00
 draft: false
+description: "Test PowerShell 7 new features and module installation in WSL1 Ubuntu."
 url: /2020/03/test-out-powershell-7-new-features-in.html
 ---
 

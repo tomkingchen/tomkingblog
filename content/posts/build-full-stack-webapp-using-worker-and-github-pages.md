@@ -2,6 +2,7 @@
 title: "Build Full Stack Webapp Using Cloudflare Worker and Github Pages"
 date: 2022-04-20T08:07:31+10:00
 draft: false
+description: "Build a full-stack webapp using Cloudflare Worker backend and GitHub Pages frontend."
 ---
 
 I have been following the COVID situation in Shanghai lately. Intentionally or not, it is surprisingly hard to find a daily chart to reflect the proper case numbers overthere. To solve this problem, I decided to build a webapp just does exactly that: a simple chart the displays Shanghai daily COVID cases that includes both symptomatic and asymptomatic cases.

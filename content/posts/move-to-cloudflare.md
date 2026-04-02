@@ -2,6 +2,7 @@
 title: "Bye Bye Google Blogger🖐, Hello Cloudflare Pages😘"
 date: 2021-09-04T11:50:12+10:00
 draft: false
+description: "Migrate blog from Google Blogger to Cloudflare Pages using Hugo."
 ---
 
 I had enough of Google Blogger! It has terrible editing UI for and I constantly receiving SPAM comments for my posts😤. Time to move my blog off to somewhere better! I was thinking to run a Wordpress server. Though I think it's way cooler to run my blog simplely without worrying about backend infrastructure.

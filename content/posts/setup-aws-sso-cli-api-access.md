@@ -2,6 +2,7 @@
 title: 'Setup AWS SSO CLI & API Access'
 date: 2018-06-25T17:24:00.001-07:00
 draft: false
+description: "Setup AWS SSO CLI access with Azure AD using aws-azure-login tool."
 url: /2018/06/setup-aws-sso-cli-api-access.html
 ---
 

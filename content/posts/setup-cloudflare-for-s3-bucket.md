@@ -2,6 +2,7 @@
 title: 'Setup Cloudflare for S3 Bucket'
 date: 2021-08-14T22:38:00.002-07:00
 draft: false
+description: "Publish S3 bucket through Cloudflare CDN using Workers to modify headers."
 url: /2021/08/setup-cloudflare-for-s3-bucket.html
 ---
 

@@ -2,6 +2,7 @@
 title: "Run Pihole on Kubernetes"
 date: 2022-10-16T18:33:35+11:00
 draft: false
+description: "Deploy Pihole on Kubernetes with MetalLB and persistent storage volumes."
 ---
 
 In this post I will show how I deployed Pihole onto my local Kubernetes cluster. In compare with some other online tutorials, this deployment saves Pihole configuration onto persistent volumes, so you won't need to reconfigure everything after pod recreation. By using LoadBalancer, original client IPs are captured correctly in my Pihole instead of seeing everything was from the Cluster IP.

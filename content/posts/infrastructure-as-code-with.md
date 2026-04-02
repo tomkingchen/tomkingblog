@@ -2,6 +2,7 @@
 title: 'Infrastructure as Code with CloudFormation'
 date: 2019-01-04T22:37:00.000-08:00
 draft: false
+description: "Deploy Apache redirect service using CloudFormation with cfn-init automation."
 url: /2019/01/infrastructure-as-code-with.html
 ---
 

@@ -2,6 +2,7 @@
 title: 'Deploy Docker Image with AWS ECS (Part 2)'
 date: 2018-10-16T20:34:00.000-07:00
 draft: false
+description: "Complete ECS cluster setup and deploy containers using task definitions."
 url: /2018/10/deploy-docker-image-with-aws-ecs-part-2.html
 ---
 

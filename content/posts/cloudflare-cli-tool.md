@@ -2,6 +2,7 @@
 title: "I wrote a Cloudflare CLI tool"
 date: 2021-10-16T11:50:12+10:00
 draft: false
+description: "Python CLI tool for querying Cloudflare API and retrieving firewall rules."
 ---
 
 I just wrote a Cloudflare CLI tool called `flare` 🔥! Check it out from my GitHub repo [git@github.com:tomkingchen/cloudflare-cli.git](git@github.com:tomkingchen/cloudflare-cli.git).

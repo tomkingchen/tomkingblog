@@ -3,6 +3,7 @@ title: "My Cka Experience"
 date: 2024-09-27T21:02:22+10:00
 featured_image: "https://blogfilesr2.tomking.xyz/kubernetes.jpg"
 draft: false
+description: "CKA exam preparation tips and experience from a successful candidate."
 ---
 
 Recently I was able to tick CKA off my TODO list. It’s a interesting and unique exam in compare to other certs I have done in my career. Below are some points I want to share to help out folks who plan to take the exam.

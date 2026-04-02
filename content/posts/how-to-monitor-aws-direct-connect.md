@@ -2,6 +2,7 @@
 title: 'Monitor AWS VPC Connectivity with Python'
 date: 2019-12-12T13:14:00.000-08:00
 draft: false
+description: "Monitor AWS VPC connectivity by deploying EC2 instances with Python."
 url: /2019/12/how-to-monitor-aws-direct-connect.html
 ---
 

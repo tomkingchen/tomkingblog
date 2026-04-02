@@ -2,6 +2,7 @@
 title: 'How did I pass AWS Solution Architect Professional Exam in just 3 weeks'
 date: 2018-10-26T12:08:00.000-07:00
 draft: false
+description: "Pass AWS Solution Architect Professional exam with 3 weeks preparation."
 url: /2018/10/how-did-i-pass-aws-solution-architect.html
 ---
 

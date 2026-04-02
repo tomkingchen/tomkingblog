@@ -2,6 +2,7 @@
 title: 'Receive error: Target mailbox doesn''t have an SMTP proxy matching ''.mail.onmicrosoft.com'' when move mailbox to Office 365'
 date: 2014-04-06T23:51:00.005-07:00
 draft: false
+description: "Fix mailbox migration errors by adding missing SMTP proxy addresses."
 url: /2014/04/office-365-exchange-hybrid-deployment.html
 tags: 
 - Exchange Hybrid

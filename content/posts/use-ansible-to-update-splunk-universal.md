@@ -2,6 +2,7 @@
 title: 'Use Ansible to update Splunk Universal Forwarder Configuration'
 date: 2021-02-20T20:55:00.002-08:00
 draft: false
+description: "Update Splunk Universal Forwarder configurations using Ansible and Jinja2 templates."
 url: /2021/02/use-ansible-to-update-splunk-universal.html
 ---
 

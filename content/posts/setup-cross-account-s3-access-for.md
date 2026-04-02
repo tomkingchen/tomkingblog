@@ -2,6 +2,7 @@
 title: 'Setup Cross Account S3 Access for Cloudberry Drive'
 date: 2019-04-13T16:05:00.000-07:00
 draft: false
+description: "Configure cross-account S3 access for Cloudberry Drive using IAM roles."
 url: /2019/04/setup-cross-account-s3-access-for.html
 ---
 

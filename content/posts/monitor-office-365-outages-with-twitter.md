@@ -2,6 +2,7 @@
 title: 'Monitor Office 365 Outages with Twitter'
 date: 2018-07-28T05:29:00.000-07:00
 draft: false
+description: "Monitor Office 365 service status using PowerShell and Twitter API."
 url: /2018/07/monitor-office-365-outages-with-twitter.html
 tags: 
 - Office 365

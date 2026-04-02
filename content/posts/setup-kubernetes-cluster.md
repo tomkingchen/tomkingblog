@@ -2,6 +2,7 @@
 title: "Setup Kubernetes Cluster from scratch"
 date: 2022-01-28T17:09:43+11:00
 draft: false
+description: "Build a Kubernetes cluster from scratch using kubeadm on Ubuntu nodes."
 ---
 
 This post I will try to go through the steps I took to build a Kubernetes cluster from scratch.

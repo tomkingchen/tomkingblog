@@ -2,6 +2,7 @@
 title: 'Install AWS CLI on WSL Ubuntu'
 date: 2018-09-01T03:43:00.001-07:00
 draft: false
+description: "Install AWS CLI and aws-shell on WSL Ubuntu with pip."
 url: /2018/09/install-aws-cli-on-wsl-ubuntu.html
 ---
 

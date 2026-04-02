@@ -2,6 +2,7 @@
 title: "Fix Ubuntu APT Update Error After Kubernetes Package Repo Change"
 date: 2024-03-11T11:25:27+11:00
 draft: false
+description: "Fix Ubuntu APT errors after Kubernetes migrated to pkgs.k8s.io repositories."
 ---
 
 Kubernetes legacy package repositories (apt.kubernetes.io and yum.kubernetes.io) have been deprecated and frozen starting from September 13, 2023.  It is strongly recommended to use the new package repositories hosted at pkgs.k8s.io. It is also required in order to install Kubernetes versions released after September 13, 2023. The new package repositories provide downloads for Kubernetes versions starting with v1.24.0. Ubuntu packages update will fail with `404 Not Found` error if you have Kubernetes packages still point to the deprecated repositories.

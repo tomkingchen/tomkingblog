@@ -2,6 +2,7 @@
 title: 'Sydney AWS Summit 2019 - My Experience'
 date: 2019-05-03T21:41:00.000-07:00
 draft: false
+description: "Experience and highlights from attending Sydney AWS Summit 2019."
 url: /2019/05/sydney-aws-summit-2019-my-experience.html
 ---
 

@@ -2,6 +2,7 @@
 title: "Kubernetes Cluster Fail to Start with Error: Error getting node"
 date: 2023-02-11T09:27:15+11:00
 draft: false
+description: "Fix Kubernetes cluster startup failures by renewing expired certificates."
 
 ---
 

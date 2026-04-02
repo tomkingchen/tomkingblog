@@ -2,6 +2,7 @@
 title: 'How Secure is RDP?'
 date: 2019-06-23T03:06:00.002-07:00
 draft: false
+description: "RDP session hijacking vulnerability using NT AUTHORITY/SYSTEM account."
 url: /2019/06/hands-up-if-you-have-following.html
 ---
 
