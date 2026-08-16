@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "https://tomking.xyz/"
 DefaultContentLanguage = "en" # Theme's display language, supports: en, fr, zh, zh-hant
 languageCode = "en-us"
 title = "Tom Tech Notes"
