@@ -2,6 +2,8 @@
 title: "How to Survive This Crazy Ai World"
 date: 2026-07-25T21:09:15+10:00
 draft: false
+categories: "Reflections"
+description: "A non-programmer's honest take on AI anxiety, and how daily use of tools like Claude Code shifted the real bottleneck from writing code to coming up with ideas."
 ---
 
 Lets admit it, this is not best time to be a software engineer or for anyone whose job is basically sitting in front of a computer. AI is moving so fast these days, and it's so overwhelming to a lot of us.

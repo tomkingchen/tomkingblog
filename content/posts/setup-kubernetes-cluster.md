@@ -2,6 +2,7 @@
 title: "Setup Kubernetes Cluster from scratch"
 date: 2022-01-28T17:09:43+11:00
 draft: false
+categories: "Field Notes"
 description: "Build a Kubernetes cluster from scratch using kubeadm on Ubuntu nodes."
 ---
 

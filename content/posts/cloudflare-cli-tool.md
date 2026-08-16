@@ -2,6 +2,7 @@
 title: "I wrote a Cloudflare CLI tool"
 date: 2021-10-16T11:50:12+10:00
 draft: false
+categories: "Field Notes"
 description: "Python CLI tool for querying Cloudflare API and retrieving firewall rules."
 ---
 

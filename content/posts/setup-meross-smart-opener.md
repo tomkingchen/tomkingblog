@@ -3,6 +3,7 @@ title: "Setup Meross Smart Garage Door Opener with Merlin Roller door"
 date: 2024-12-27T20:56:55+11:00
 featured_image: "https://blogfilesr2.tomking.xyz/chips.jpg"
 draft: false
+categories: "Field Notes"
 description: "Setup Meross smart garage door opener with Merlin roller door and HomeKit."
 ---
 

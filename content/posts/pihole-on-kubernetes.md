@@ -2,6 +2,7 @@
 title: "Run Pihole on Kubernetes"
 date: 2022-10-16T18:33:35+11:00
 draft: false
+categories: "Field Notes"
 description: "Deploy Pihole on Kubernetes with MetalLB and persistent storage volumes."
 ---
 

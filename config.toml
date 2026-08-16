@@ -13,7 +13,7 @@ theme = "diary"
 # Google Analytics
 [services]
   [services.googleAnalytics]
-    id = "G-XXXXXXXXXX"  # Your Google Analytics ID
+    id = "G-TRT1VFRGT0"
 
 [markup]
   [markup.highlight]
@@ -35,11 +35,15 @@ enableGiscus = true
 # Microsoft Clarity (https://clarity.microsoft.com/) is a free user behavior recording and analytics tool
 clarity = "abcdefghzd"
 
+# Google Search Console verification token (the `content` value from the
+# HTML-tag verification method) -- separate from the GA measurement ID above.
+googleSiteVerification = ""
+
 # Twitter Card and Open Graph settings
 enableOpenGraph = true
 enableTwitterCards = true
 title = "Tom Tech Notes" # will set 'og:site_name'
-description = "Coz Blog is no longer cool"  # will set 'og:description'
+description = "Hands-on notes from the trenches on Kubernetes, AWS, and cloud infrastructure — plus what it's like figuring out how to work alongside AI."  # will set 'og:description'
 
 [params.gitalk]
   owner = "user"
@@ -72,6 +76,10 @@ theme="github-light"
     crossorigin="anonymous"
 
 
+[[menu.main]]
+url = "/about"
+name = "About"
+weight = 0
 [[menu.main]]
 url = "/categories"
 name = "Categories"

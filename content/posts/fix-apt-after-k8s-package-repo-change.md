@@ -2,6 +2,7 @@
 title: "Fix Ubuntu APT Update Error After Kubernetes Package Repo Change"
 date: 2024-03-11T11:25:27+11:00
 draft: false
+categories: "Field Notes"
 description: "Fix Ubuntu APT errors after Kubernetes migrated to pkgs.k8s.io repositories."
 ---
 

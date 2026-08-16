@@ -2,6 +2,7 @@
 title: "Fix Docker Container Golang Execute Format Error"
 date: 2023-12-10T20:12:21+11:00
 draft: false
+categories: "Field Notes"
 description: "Fix Go binary execution errors by compiling for correct CPU architecture."
 ---
 

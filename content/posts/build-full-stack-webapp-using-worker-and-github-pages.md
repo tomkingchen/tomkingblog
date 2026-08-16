@@ -2,6 +2,7 @@
 title: "Build Full Stack Webapp Using Cloudflare Worker and Github Pages"
 date: 2022-04-20T08:07:31+10:00
 draft: false
+categories: "Field Notes"
 description: "Build a full-stack webapp using Cloudflare Worker backend and GitHub Pages frontend."
 ---
 

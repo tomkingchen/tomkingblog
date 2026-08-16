@@ -2,6 +2,7 @@
 title: "Deploy Metrics-server in Kubernetes with TLS enabled"
 date: 2022-11-10T13:50:40+11:00
 draft: false
+categories: "Field Notes"
 description: "Deploy metrics-server in Kubernetes with signed kubelet certificates and TLS."
 ---
 

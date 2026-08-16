@@ -2,6 +2,7 @@
 title: "Bye Bye Google Blogger🖐, Hello Cloudflare Pages😘"
 date: 2021-09-04T11:50:12+10:00
 draft: false
+categories: "Field Notes"
 description: "Migrate blog from Google Blogger to Cloudflare Pages using Hugo."
 ---
 

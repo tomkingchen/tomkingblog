@@ -2,6 +2,7 @@
 title: "How to Set Up AWS MCP in VS Code with AWS SSO"
 date: 2026-03-28T16:00:55+11:00
 draft: false
+categories: "Field Notes"
 description: "Use AWS MCP in VS Code with an AWS SSO profile instead of relying on the default credential chain."
 ---
 
