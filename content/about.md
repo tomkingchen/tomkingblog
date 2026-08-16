@@ -12,6 +12,6 @@ I started out in IT admin work — mostly knowing which button to click, then fi
 
 I'm not a "real" programmer by trade — most of what I build is the end result of a lot of googling, reading other people's code, and lately, a lot of back-and-forth with AI tools like Claude Code. I've made my peace with that. These days the bottleneck isn't writing the code, it's figuring out what's worth building.
 
-This blog is mostly **Field Notes** — the troubleshooting write-ups I wish I'd found when I hit the same wall, on Kubernetes, AWS, Azure, and whatever else broke that week. Occasionally there's a **Reflections** post where I zoom out and think out loud about certifications, conferences, or how the AI-shaped ground keeps shifting under this job.
+Most of what's here is Field Notes: the troubleshooting write-ups I wish I'd found when I hit the same wall, on Kubernetes, AWS, Azure, and whatever else broke that week. Every so often there's a Reflections post instead, where I zoom out and think out loud about certifications, conferences, or how the AI-shaped ground keeps shifting under this job.
 
 If any of it saves you an hour of googling, it did its job.
