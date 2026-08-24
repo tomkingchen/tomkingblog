@@ -1,0 +1,16 @@
+{{- $p := .page -}}
+<a class="row-item" href="{{ $p.RelPermalink }}">
+  <div class="row-main">
+    <div class="row-meta">
+      <time datetime="{{ $p.Date.Format "2006-01-02" }}">{{ $p.Date.Format "2 Jan 2006" }}</time>
+      {{ if and .showCategory $p.Params.categories }}
+      <span>· {{ $p.Params.categories }}</span>
+      {{ end }}
+    </div>
+    <h3 class="row-title">{{ $p.Title }}</h3>
+    {{ with $p.Params.description }}
+    <p class="row-desc">{{ . }}</p>
+    {{ end }}
+  </div>
+  <div class="row-arrow">→</div>
+</a>

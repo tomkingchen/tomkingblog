@@ -1,0 +1,16 @@
+{{ define "main" }}
+<div class="wrap">
+  <section class="hero">
+    <h1>{{ .Title }}</h1>
+  </section>
+  <section class="section-block">
+    <div class="pill-grid">
+      {{ range .Data.Terms.Alphabetical }}
+      <a class="pill" href="{{ .Page.RelPermalink }}">
+        {{ .Page.Title }} <span class="count">{{ .Count }}</span>
+      </a>
+      {{ end }}
+    </div>
+  </section>
+</div>
+{{ end }}

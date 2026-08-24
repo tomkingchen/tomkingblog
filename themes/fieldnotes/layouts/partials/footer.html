@@ -1,0 +1,10 @@
+<footer class="site-footer">
+  <div class="wrap">
+    <div>© {{ now.Year }} {{ .Site.Title }}</div>
+    <div class="footer-links">
+      <a href="{{ "/about" | relLangURL }}">About</a>
+      <a href="{{ "/index.xml" | relLangURL }}">RSS</a>
+      {{ with .Site.Params.githubUrl }}<a href="{{ . }}">GitHub</a>{{ end }}
+    </div>
+  </div>
+</footer>

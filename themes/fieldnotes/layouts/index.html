@@ -1,0 +1,63 @@
+{{ define "main" }}
+{{- $posts := where site.RegularPages "Type" "posts" -}}
+{{- $posts = $posts.ByDate.Reverse -}}
+{{- $fieldNotes := where $posts "Params.categories" "Field Notes" -}}
+{{- $reflections := where $posts "Params.categories" "Reflections" -}}
+
+<div class="wrap">
+  <section class="hero">
+    <h1>{{ .Site.Title }}</h1>
+    <p>{{ .Site.Params.description }}</p>
+    <div class="hero-stats">
+      <span><strong>{{ len $posts }}</strong> posts</span>
+      <span><strong>{{ len $fieldNotes }}</strong> field notes</span>
+      <span><strong>{{ len $reflections }}</strong> reflections</span>
+      <a href="{{ "/index.xml" | relLangURL }}"><strong>RSS</strong> feed</a>
+    </div>
+  </section>
+
+  {{ if $fieldNotes }}
+  <section class="section-block">
+    <div class="section-head">
+      <div class="section-num">01</div>
+      <div>
+        <h2>Field Notes</h2>
+        <p>Troubleshooting write-ups from Kubernetes, AWS, Azure, and whatever else broke that week.</p>
+      </div>
+    </div>
+    <div class="row-list">
+      {{ range first 8 $fieldNotes }}
+      {{ partial "row-item.html" (dict "page" .) }}
+      {{ end }}
+    </div>
+    {{ if gt (len $fieldNotes) 8 }}
+    <div class="row-item" style="border-top:none;padding-top:22px;">
+      <a href="{{ "/categories/field-notes/" | relLangURL }}" style="color:var(--accent);font-size:14px;font-weight:600;">View all {{ len $fieldNotes }} Field Notes →</a>
+    </div>
+    {{ end }}
+  </section>
+  {{ end }}
+
+  {{ if $reflections }}
+  <section class="section-block">
+    <div class="section-head">
+      <div class="section-num">02</div>
+      <div>
+        <h2>Reflections</h2>
+        <p>Zooming out on certifications, conferences, and the AI-shaped ground shifting under this job.</p>
+      </div>
+    </div>
+    <div class="row-list">
+      {{ range first 8 $reflections }}
+      {{ partial "row-item.html" (dict "page" .) }}
+      {{ end }}
+    </div>
+    {{ if gt (len $reflections) 8 }}
+    <div class="row-item" style="border-top:none;padding-top:22px;">
+      <a href="{{ "/categories/reflections/" | relLangURL }}" style="color:var(--accent);font-size:14px;font-weight:600;">View all {{ len $reflections }} Reflections →</a>
+    </div>
+    {{ end }}
+  </section>
+  {{ end }}
+</div>
+{{ end }}

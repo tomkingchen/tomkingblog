@@ -1,0 +1,36 @@
+{{ define "main" }}
+{{- $pages := .Pages.ByDate.Reverse -}}
+{{- $years := slice -}}
+{{- range $pages }}{{ $years = $years | append .Date.Year }}{{ end -}}
+{{- $years = $years | uniq -}}
+
+<div class="wrap">
+  <section class="hero">
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
+    <div class="hero-stats">
+      <span><strong>{{ len $pages }}</strong> posts</span>
+    </div>
+  </section>
+
+  {{ range $years }}
+  {{ $year := . }}
+  {{ $yearPages := where $pages "Date.Year" $year }}
+  <section class="section-block">
+    <div class="section-head">
+      <div class="section-num">{{ $year }}</div>
+      <div><h2>{{ $year }}</h2></div>
+    </div>
+    <div class="row-list">
+      {{ range $yearPages }}
+      {{ partial "row-item.html" (dict "page" . "showCategory" true) }}
+      {{ end }}
+    </div>
+  </section>
+  {{ end }}
+
+  {{ if not $pages }}
+  <p class="section-empty">Nothing here yet.</p>
+  {{ end }}
+</div>
+{{ end }}

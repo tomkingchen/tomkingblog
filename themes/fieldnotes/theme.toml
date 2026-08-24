@@ -1,0 +1,4 @@
+name = "Field Notes"
+license = "MIT"
+description = "A minimal, dark, docs-style theme inspired by aihero.dev, built for tomking.xyz."
+min_version = "0.100.0"

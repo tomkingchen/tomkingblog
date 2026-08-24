@@ -2,7 +2,7 @@ baseURL = "https://tomking.xyz/"
 DefaultContentLanguage = "en" # Theme's display language, supports: en, fr, zh, zh-hant
 languageCode = "en-us"
 title = "Tom Tech Notes"
-theme = "diary"
+theme = "fieldnotes"
 
 # Generate sitemap in the public folder
 [sitemap]
@@ -71,7 +71,7 @@ theme="github-light"
     data_reactions_enabled="1"
     data_emit_metadata="0"
     data_input_position="bottom"
-    data_theme="preferred_color_scheme"
+    data_theme="dark"
     data_lang="en"
     crossorigin="anonymous"
 

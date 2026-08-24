@@ -1,0 +1,23 @@
+{{ define "main" }}
+{{- $pages := .Pages.ByDate.Reverse -}}
+<div class="wrap">
+  <section class="hero">
+    <div class="crumb"><a href="{{ .Parent.RelPermalink }}">{{ .Parent.Title }}</a></div>
+    <h1>{{ .Title }}</h1>
+    <div class="hero-stats">
+      <span><strong>{{ len $pages }}</strong> posts</span>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="row-list">
+      {{ range $pages }}
+      {{ partial "row-item.html" (dict "page" . "showCategory" true) }}
+      {{ end }}
+    </div>
+    {{ if not $pages }}
+    <p class="section-empty">Nothing here yet.</p>
+    {{ end }}
+  </section>
+</div>
+{{ end }}

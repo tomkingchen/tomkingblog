@@ -1,0 +1,55 @@
+{{ define "main" }}
+{{- $isPost := eq .Section "posts" -}}
+
+<div class="wrap">
+  <header class="post-header">
+    {{ if $isPost }}
+    <div class="crumb">
+      <a href="{{ "/posts" | relLangURL }}">Posts</a>
+      {{ with .Params.categories }} / <a href="{{ "/categories/" | relLangURL }}{{ . | urlize }}/">{{ . }}</a>{{ end }}
+    </div>
+    {{ end }}
+
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.description }}<p class="desc">{{ . }}</p>{{ end }}
+
+    {{ if $isPost }}
+    <div class="post-meta-row">
+      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2 January 2006" }}</time>
+      {{ with .Params.categories }}<span>{{ . }}</span>{{ end }}
+      {{ $words := countwords .Content }}
+      <span>{{ math.Ceil (div $words 220.0) }} min read</span>
+    </div>
+    {{ end }}
+  </header>
+
+  <div class="post-body-wrap">
+    <article class="post-content">
+      {{ .Content }}
+    </article>
+  </div>
+
+  {{ if $isPost }}
+  <nav class="post-adjacent">
+    {{ with .PrevInSection }}
+    <a class="prev" href="{{ .RelPermalink }}">
+      <div class="label">← Previous</div>
+      <div class="title">{{ .Title }}</div>
+    </a>
+    {{ else }}<span></span>{{ end }}
+    {{ with .NextInSection }}
+    <a class="next" href="{{ .RelPermalink }}">
+      <div class="label">Next →</div>
+      <div class="title">{{ .Title }}</div>
+    </a>
+    {{ else }}<span></span>{{ end }}
+  </nav>
+
+  {{ if ne .Params.comment false }}
+  <div class="post-comments">
+    {{ partial "comments.html" . }}
+  </div>
+  {{ end }}
+  {{ end }}
+</div>
+{{ end }}

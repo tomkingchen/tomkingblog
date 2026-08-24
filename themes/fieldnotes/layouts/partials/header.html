@@ -1,0 +1,17 @@
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="{{ "/" | relLangURL }}">
+      <span class="dot"></span>
+      {{ .Site.Title }}
+    </a>
+    <nav class="site-nav">
+      {{ range .Site.Menus.main }}
+        {{ if eq .Name "RSS Feed" }}
+        <a class="rss" href="{{ .URL | relLangURL }}">{{ .Name }}</a>
+        {{ else }}
+        <a href="{{ .URL | relLangURL }}">{{ .Name }}</a>
+        {{ end }}
+      {{ end }}
+    </nav>
+  </div>
+</header>
