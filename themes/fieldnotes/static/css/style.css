@@ -99,6 +99,16 @@ a {
   flex: none;
 }
 
+.brand .avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-strong);
+  flex: none;
+  margin-left: 2px;
+}
+
 .site-nav {
   display: flex;
   align-items: center;

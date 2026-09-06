@@ -3,6 +3,9 @@
     <a class="brand" href="{{ "/" | relLangURL }}">
       <span class="dot"></span>
       {{ .Site.Title }}
+      {{ with .Site.Params.avatar }}
+      <img class="avatar" src="{{ . | relURL }}" alt="">
+      {{ end }}
     </a>
     <nav class="site-nav">
       {{ range .Site.Menus.main }}

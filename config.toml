@@ -29,6 +29,7 @@ theme = "fieldnotes"
 
 [params]
 subtitle = "Coding, Tech, and Life"
+avatar = "/images/tom-avatar.jpg"
 enableGitalk = false
 enableGiscus = true
 
