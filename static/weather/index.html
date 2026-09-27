@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donvale 7-Day Forecast</title>
+<style>
+  :root {
+    --bg: #000000;
+    --panel-bg: #28292c;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --hover: rgba(255, 255, 255, 0.08);
+    --track-bg: rgba(255, 255, 255, 0.16);
+    --rain: #8ab4f8;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    font-size: 110%;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 48px;
+  }
+
+  header {
+    max-width: 900px;
+    margin: 0 auto 20px;
+    text-align: center;
+  }
+
+  header h1 {
+    margin: 0 0 4px;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+
+  header .subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  #status {
+    max-width: 900px;
+    margin: 0 auto 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  #status.error {
+    color: #ff6b6b;
+    font-weight: 600;
+  }
+
+  .panel {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--panel-bg);
+    border-radius: 24px;
+    padding: 12px 8px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    overflow-x: auto;
+  }
+
+  #forecast {
+    display: flex;
+    justify-content: space-between;
+    gap: 2px;
+  }
+
+  .day {
+    flex: 1 1 0;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 8px;
+    border-radius: 18px;
+    text-align: center;
+    cursor: default;
+    transition: background-color 0.15s ease;
+  }
+
+  .day:hover {
+    background: var(--hover);
+  }
+
+  .day-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .icon {
+    font-size: 1.9rem;
+    line-height: 1;
+  }
+
+  .rain {
+    font-size: 0.78rem;
+    color: var(--rain);
+    min-height: 1.1em;
+  }
+
+  .temp-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .temp-min {
+    font-size: 0.9rem;
+    color: var(--muted);
+    min-width: 1.6em;
+    text-align: right;
+  }
+
+  .temp-max {
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 1.6em;
+    text-align: left;
+  }
+
+  .track {
+    position: relative;
+    width: 44px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--track-bg);
+    overflow: hidden;
+    flex: 0 0 auto;
+  }
+
+  .track .range {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #4fc3f7, #ffd54f, #ff7043);
+  }
+
+  footer {
+    max-width: 900px;
+    margin: 20px auto 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Donvale, VIC</h1>
+  <div class="subtitle">7-Day Forecast &mdash; Bureau of Meteorology</div>
+</header>
+
+<div id="status">Loading forecast&hellip;</div>
+<div class="panel"><div id="forecast"></div></div>
+
+<footer>Data: Bureau of Meteorology (BOM) &middot; Last updated: <span id="updated">&mdash;</span></footer>
+
+<script>
+  const FORECAST_URL = "https://api.weather.bom.gov.au/v1/locations/r1r1pbt/forecasts/daily";
+
+  const ICONS = {
+    sunny: "☀️",
+    clear: "☀️",
+    mostly_sunny: "🌤️",
+    partly_cloudy: "⛅",
+    cloudy: "☁️",
+    mostly_cloudy: "☁️",
+    hazy: "🌥️",
+    light_rain: "🌦️",
+    rain: "🌧️",
+    showers: "🌦️",
+    light_shower: "🌦️",
+    heavy_shower: "🌧️",
+    storm: "⛈️",
+    tropical_cyclone: "🌀",
+    dusty: "🌫️",
+    fog: "🌫️",
+    frost: "❄️",
+    snow: "🌨️",
+    windy: "💨"
+  };
+
+  function iconFor(descriptor) {
+    return ICONS[descriptor] || "🌤️";
+  }
+
+  function formatDayName(date, index) {
+    if (index === 0) return "Today";
+    return date.toLocaleDateString("en-AU", { weekday: "short" });
+  }
+
+  function formatDayDate(date) {
+    return date.toLocaleDateString("en-AU", { day: "numeric", month: "short" });
+  }
+
+  function renderForecast(days) {
+    const container = document.getElementById("forecast");
+    container.innerHTML = "";
+
+    const weekDays = days.slice(0, 7);
+    const mins = weekDays.map(d => d.temp_min).filter(v => v != null);
+    const maxs = weekDays.map(d => d.temp_max).filter(v => v != null);
+    const weekMin = Math.min(...mins);
+    const weekMax = Math.max(...maxs);
+    const range = (weekMax - weekMin) || 1;
+
+    weekDays.forEach((day, index) => {
+      const date = new Date(day.date);
+      const uvCategory = day.uv && day.uv.category ? day.uv.category : "—";
+      const title = `${formatDayDate(date)} • UV: ${uvCategory}${day.extended_text ? " • " + day.extended_text : ""}`;
+
+      const el = document.createElement("div");
+      el.className = "day";
+      el.title = title;
+
+      const hasMin = day.temp_min != null;
+      const hasMax = day.temp_max != null;
+      const leftInset = hasMin ? Math.max(0, Math.min(100, ((day.temp_min - weekMin) / range) * 100)) : 0;
+      const rightInset = hasMax ? Math.max(0, Math.min(100, 100 - ((day.temp_max - weekMin) / range) * 100)) : 0;
+
+      const rainChance = day.rain && day.rain.chance != null ? day.rain.chance : 0;
+
+      el.innerHTML = `
+        <div class="day-name">${formatDayName(date, index)}</div>
+        <div class="icon">${iconFor(day.icon_descriptor)}</div>
+        <div class="rain">${rainChance > 0 ? "💧 " + rainChance + "%" : ""}</div>
+        <div class="temp-row">
+          <span class="temp-min">${hasMin ? day.temp_min + "°" : "—"}</span>
+          <div class="track"><div class="range" style="clip-path: inset(0 ${rightInset}% 0 ${leftInset}%)"></div></div>
+          <span class="temp-max">${hasMax ? day.temp_max + "°" : "—"}</span>
+        </div>
+      `;
+
+      container.appendChild(el);
+    });
+  }
+
+  async function loadForecast() {
+    const status = document.getElementById("status");
+    try {
+      const response = await fetch(FORECAST_URL);
+      if (!response.ok) {
+        throw new Error("BOM API returned HTTP " + response.status);
+      }
+      const payload = await response.json();
+      const days = payload && payload.data;
+      if (!Array.isArray(days) || days.length === 0) {
+        throw new Error("No forecast data in response");
+      }
+
+      renderForecast(days);
+      status.textContent = "";
+      status.className = "";
+      document.getElementById("updated").textContent = new Date().toLocaleString("en-AU");
+    } catch (err) {
+      status.textContent = "Couldn't load the forecast: " + err.message;
+      status.className = "error";
+    }
+  }
+
+  loadForecast();
+</script>
+
+</body>
+</html>
